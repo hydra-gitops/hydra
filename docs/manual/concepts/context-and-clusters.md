@@ -17,10 +17,11 @@ Each subdirectory is a **cluster name** in Hydra. All commands that accept a clu
 
 Validation rules:
 
-- Context-level `values.yaml` (at `HYDRA_CONTEXT/values.yaml`) must not define `global.hydra.path`.
-- Cluster-level `values.yaml` (at `HYDRA_CONTEXT/<cluster>/values.yaml`) must define `global.hydra.path`.
-
-This makes the chart path explicit per cluster and avoids accidental cross-cluster reuse.
+- Hydra uses `global.hydra.type` to resolve hierarchy levels (`group`, `context`, `cluster`, `root-app`, `child-app`).
+- At least one level must define `global.hydra.type`.
+- Levels below a typed parent are inferred automatically.
+- `global.hydra.parent: false` stops parent lookup at that level.
+- Parent lookup defaults to `true`, except `group` which defaults to `false`.
 
 ## What Is a Cluster?
 

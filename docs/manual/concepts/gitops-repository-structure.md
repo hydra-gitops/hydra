@@ -137,7 +137,7 @@ global:
     revision: main
 ```
 
-Important: `global.hydra.path` is cluster-specific and belongs in cluster `values.yaml`, not in context-level `values.yaml`.
+Important: Use `global.hydra.type` to mark hierarchy levels (`group/context/cluster/root-app/child-app`). You can stop parent lookup with `global.hydra.parent: false` on a level.
 
 ### templates/apps.yaml
 

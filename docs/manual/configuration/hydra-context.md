@@ -24,12 +24,14 @@ In a typical layout, cluster definitions live under something like `gitops-repos
 
 ## Validation Rules
 
-Hydra validates context and cluster values as follows:
+Hydra resolves hierarchy levels using `global.hydra.type` and optional `global.hydra.parent`.
 
-- `HYDRA_CONTEXT/values.yaml` is optional, but if present it must **not** define `global.hydra.path`.
-- Each cluster directory under `HYDRA_CONTEXT` must contain `<cluster>/values.yaml` with `global.hydra.path`.
-
-`global.hydra.path` is cluster-specific and must be configured at cluster level only.
+- Allowed `global.hydra.type` values are `group`, `context`, `cluster`, `root-app`, `child-app`.
+- At least one level in the hierarchy must define `global.hydra.type`.
+- Child levels are inferred automatically from parents (`group -> context -> cluster -> root-app -> child-app`).
+- If a level defines a conflicting explicit type, Hydra returns an error.
+- `global.hydra.parent` controls parent lookup (`true` by default, `false` disables lookup for that level).
+- Default for `group` is `parent: false` when `parent` is omitted.
 
 Hydra context detection no longer depends on an `in-cluster/argocd` directory.
 
