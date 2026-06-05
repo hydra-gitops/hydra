@@ -70,6 +70,8 @@ homebrew_casks:
     binaries:
       - hydra
     repository:
+      owner: hydra-gitops
+      name: homebrew-tap
       branch: main
       git:
         url: "ssh://git@github.com/hydra-gitops/homebrew-tap.git"
