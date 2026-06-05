@@ -1,0 +1,48 @@
+.hydra-asciinema {
+  margin: 1.5rem 0;
+  max-width: 100%;
+}
+
+.hydra-asciinema .asciinema-player {
+  max-width: 100%;
+}
+
+/* Keep the playback timeline (history scrubber) visible and below the terminal. */
+.hydra-asciinema .ap-wrapper.ap-hud .ap-control-bar,
+.hydra-asciinema .ap-control-bar {
+  opacity: 1 !important;
+}
+
+.hydra-asciinema .ap-player {
+  display: flex;
+  flex-direction: column;
+}
+
+.hydra-asciinema .ap-player .ap-control-bar {
+  position: static !important;
+  order: 2;
+}
+
+.hydra-asciinema .ap-player .ap-term {
+  order: 1;
+}
+
+/* Larger, easier-to-grab timeline scrollbar. */
+.hydra-asciinema .ap-control-bar .ap-progressbar {
+  flex: 1 1 auto;
+  min-width: 8rem;
+  padding: 4px 0;
+}
+
+.hydra-asciinema .ap-control-bar .ap-progressbar .ap-bar {
+  height: 10px;
+  cursor: pointer;
+}
+
+.hydra-asciinema .ap-control-bar .ap-progressbar .ap-bar .ap-gutter {
+  cursor: grab;
+}
+
+.hydra-asciinema .ap-control-bar .ap-progressbar .ap-bar .ap-gutter:active {
+  cursor: grabbing;
+}
