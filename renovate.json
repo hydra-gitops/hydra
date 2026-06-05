@@ -25,7 +25,24 @@
   "schedule": [
     "after 3am and before 5am every day"
   ],
+  "semanticCommits": "enabled",
+  "semanticCommitScope": "deps",
   "packageRules": [
+    {
+      "matchUpdateTypes": [
+        "patch",
+        "minor"
+      ],
+      "semanticCommitType": "update",
+      "automerge": true
+    },
+    {
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "semanticCommitType": "feat",
+      "automerge": false
+    },
     {
       "matchManagers": [
         "custom.regex",

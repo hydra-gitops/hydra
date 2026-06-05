@@ -44,6 +44,7 @@ semantic-release (preset `conventionalcommits`) calculates the next release from
 - `feat:` causes a **minor** bump
 - `fix:` causes a **patch** bump
 - `perf:` typically causes a **patch** bump
+- `update:` causes a **patch** bump (used for dependency update commits)
 - `feat!:` or `fix!:` causes a **major** bump
 - `BREAKING CHANGE:` in the footer causes a **major** bump
 - `docs:`, `chore:`, `test:`, `refactor:` usually do not trigger a release unless a releasing type is also included
@@ -52,6 +53,7 @@ Examples:
 
 - `feat(cli): add export command`
 - `fix(core): handle empty values file`
+- `update(deps): bump k8s.io/client-go to v0.31.2`
 - `feat(api)!: remove legacy endpoint`
 
 ```text
