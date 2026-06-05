@@ -1,0 +1,15 @@
+# Builtin cluster-defaults preset: cloud-init-settings namespace (Kubermatic / platform user-data access RBAC).
+id: cloudinit
+defaultEnabled: false
+predicates:
+  namespace-and-rbac:
+    ids:
+      - 'v1/Namespace//cloud-init-settings'
+      - 'v1/ConfigMap/cloud-init-settings/kube-root-ca.crt'
+      - 'v1/ServiceAccount/cloud-init-settings/cloud-init-getter'
+      - 'v1/ServiceAccount/cloud-init-settings/default'
+      - 'rbac.authorization.k8s.io/v1/Role/cloud-init-settings/cloud-init-getter'
+      - 'rbac.authorization.k8s.io/v1/Role/cloud-init-settings/namespace-admin'
+      - 'rbac.authorization.k8s.io/v1/Role/cloud-init-settings/namespace-editor'
+      - 'rbac.authorization.k8s.io/v1/Role/cloud-init-settings/namespace-viewer'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/cloud-init-settings/cloud-init-getter'

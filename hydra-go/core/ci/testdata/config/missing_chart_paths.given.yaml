@@ -1,0 +1,6 @@
+# Missing rootAppsPath should produce an error
+ci:
+  environments:
+    - dev
+    - stage
+    - prod

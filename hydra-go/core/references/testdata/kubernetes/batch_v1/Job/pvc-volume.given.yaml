@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: busybox
+          command: ["echo", "hello"]
+          volumeMounts:
+            - name: pvc-vol
+              mountPath: /data
+      restartPolicy: Never
+      volumes:
+        - name: pvc-vol
+          persistentVolumeClaim:
+            claimName: my-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

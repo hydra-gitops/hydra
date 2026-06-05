@@ -1,0 +1,95 @@
+refDefinitions:
+    - owner: batch/v1/Job/default/my-job
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: batch/v1/Job/default/my-job
+    - owner: batch/v1/Job/default/my-job
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+      label: volume
+    - owner: batch/v1/Job/default/my-job
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: batch/v1/Job/default/my-job
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Secret/default/my-secret
+      label: volume
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/Secret/default/my-secret
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/Secret/default/my-secret
+    - owner: v1/Secret/default/my-secret
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: batch/v1/Job/default/my-job
+      to: v1/ConfigMap/default/my-config
+      labels:
+        - volume
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: batch/v1/Job/default/my-job
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: batch/v1/Job/default/my-job
+      to: v1/Secret/default/my-secret
+      labels:
+        - volume
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/default/my-config
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/Secret/default/my-secret
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

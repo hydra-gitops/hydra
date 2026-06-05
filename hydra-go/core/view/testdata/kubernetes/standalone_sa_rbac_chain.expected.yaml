@@ -1,0 +1,107 @@
+entities:
+    - id: rbac.authorization.k8s.io/v1/ClusterRole//admission
+      templatePath: unknown-5.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - admissionregistration.k8s.io
+          resources:
+            - validatingwebhookconfigurations
+          verbs:
+            - get
+            - update
+    - id: rbac.authorization.k8s.io/v1/ClusterRoleBinding//admission
+      templatePath: unknown-6.yaml
+      templateIndex: 1
+    - id: rbac.authorization.k8s.io/v1/Role/monitoring/admission
+      templatePath: unknown-3.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - ""
+          resources:
+            - secrets
+          verbs:
+            - get
+            - create
+    - id: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/admission
+      templatePath: unknown-4.yaml
+      templateIndex: 1
+    - id: v1/Namespace//monitoring
+      tags:
+        - app:missing
+    - id: v1/Secret/monitoring/image-pull-secret
+      templatePath: unknown-2.yaml
+      templateIndex: 1
+      secretKeys:
+        - .dockerconfigjson
+    - id: v1/ServiceAccount/monitoring/admission
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+groups:
+    - name: admission (ServiceAccount)
+      ids:
+        - rbac.authorization.k8s.io/v1/ClusterRole//admission
+        - rbac.authorization.k8s.io/v1/ClusterRoleBinding//admission
+        - rbac.authorization.k8s.io/v1/Role/monitoring/admission
+        - rbac.authorization.k8s.io/v1/RoleBinding/monitoring/admission
+        - v1/Namespace//monitoring
+        - v1/Secret/monitoring/image-pull-secret
+        - v1/ServiceAccount/monitoring/admission
+references:
+    - from: rbac.authorization.k8s.io/v1/ClusterRoleBinding//admission
+      to: rbac.authorization.k8s.io/v1/ClusterRole//admission
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/ClusterRoleBinding//admission
+      to: v1/ServiceAccount/monitoring/admission
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: rbac.authorization.k8s.io/v1/Role/monitoring/admission
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/admission
+      to: rbac.authorization.k8s.io/v1/Role/monitoring/admission
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/admission
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/admission
+      to: v1/ServiceAccount/monitoring/admission
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: v1/Secret/monitoring/image-pull-secret
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ServiceAccount/monitoring/admission
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ServiceAccount/monitoring/admission
+      to: v1/Secret/monitoring/image-pull-secret
+      labels:
+        - imagePullSecret
+      attributes:
+        - origin:source: template

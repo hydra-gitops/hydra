@@ -1,0 +1,17 @@
+# Builtin cluster-defaults preset: Gardener Monex monitoring RBAC.
+id: monex
+defaultEnabled: false
+predicates:
+  serviceaccounts:
+    ids:
+      - 'v1/ServiceAccount/kube-system/monex-kube-state-metrics'
+      - id: 'v1/ServiceAccount/kube-system/monex-prometheus'
+        optional: true
+  rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//monex-kube-state-metrics'
+      - id: 'rbac.authorization.k8s.io/v1/ClusterRole//monex-prometheus'
+        optional: true
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//monex-kube-state-metrics'
+      - id: 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//monex-prometheus'
+        optional: true

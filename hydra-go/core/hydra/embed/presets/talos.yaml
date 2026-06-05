@@ -1,0 +1,29 @@
+# Builtin cluster-defaults preset: Talos Linux control-plane / node integration RBAC (system:* and system-bootstrap:*).
+id: talos
+defaultEnabled: false
+activates:
+  - kube-controller-manager
+  - kube-scheduler
+  - kube-proxy
+predicates:
+  kubeconfig-in-cluster:
+    ids:
+      - 'v1/ConfigMap/kube-system/kubeconfig-in-cluster'
+  bootstrap-and-nodes:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:talos-nodes'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:talos-nodes'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system-bootstrap-approve-node-client-csr'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system-bootstrap-node-bootstrapper'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system-bootstrap-node-renewal'
+  # Talos ships the standard kube-proxy ClusterRoleBinding name; MetaKube-style stacks use kubeadm:node-proxier instead (metakube preset).
+  kube-proxy-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//kube-proxy'
+  # kubeadm-style bootstrap token Secrets (Talos node join); optional when absent.
+  bootstrap-tokens:
+    cel:
+      - gvk: v1/Secret
+        namespace: kube-system
+        cel: 'name.matches("^bootstrap-token-[a-z0-9]{6}$")'
+        optional: true

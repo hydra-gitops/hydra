@@ -1,0 +1,135 @@
+refDefinitions:
+    - owner: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+    - owner: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+    - owner: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      label: roleRef
+    - owner: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/default/sa-one
+      label: subject
+      reverse: true
+    - owner: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/other-ns/sa-two
+      label: subject
+      reverse: true
+    - owner: v1/ServiceAccount/default/sa-one
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/default/sa-one
+    - owner: v1/ServiceAccount/default/sa-one
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/ServiceAccount/other-ns/sa-two
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/other-ns/sa-two
+    - owner: v1/ServiceAccount/other-ns/sa-two
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//other-ns
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      to: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      to: v1/ServiceAccount/default/sa-one
+      labels:
+        - subject
+      attributes:
+        - origin:source: test
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/RoleBinding/default/multi-sa-binding
+      to: v1/ServiceAccount/other-ns/sa-two
+      labels:
+        - subject
+      attributes:
+        - origin:source: test
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: v1/ServiceAccount/default/sa-one
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ServiceAccount/other-ns/sa-two
+      to: v1/Namespace//other-ns
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cronjob
+  namespace: default
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: app
+              image: busybox
+              command: ["echo", "hello"]
+              volumeMounts:
+                - name: config-vol
+                  mountPath: /etc/config
+          restartPolicy: Never
+          volumes:
+            - name: config-vol
+              configMap:
+                name: my-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  key: value

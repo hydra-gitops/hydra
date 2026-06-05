@@ -1,0 +1,16 @@
+ref-parsers:
+  - predicate: 'gvk.startsWith("kafka.strimzi.io/")'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "strimzi"))]'
+  - predicate: '(kind == "KafkaUser" || kind == "KafkaTopic") && "strimzi.io/cluster" in entity.metadata.labels'
+    pick:
+      - cel: '[refBuilder().outgoing(id("kafka.strimzi.io/v1beta2/Kafka", ns, entity.metadata.labels["strimzi.io/cluster"]))]'
+        label: kafka-cluster
+  - predicate: 'kind == "KafkaUser"'
+    pick:
+      - cel: '[refBuilder().outgoing(id("v1/Secret", ns, "kafkauser-" + name))]'
+        label: kafkauser
+        reverse: true
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "strimzi-cluster-operator"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "strimzi"))]'

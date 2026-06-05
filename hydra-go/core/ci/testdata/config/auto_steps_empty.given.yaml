@@ -1,0 +1,8 @@
+# autoSteps present but empty — invalid
+ci:
+  rootAppsPath: "apps"
+  environments:
+    - dev
+    - stage
+    - prod
+  autoSteps: []

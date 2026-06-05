@@ -1,0 +1,7 @@
+ref-parsers:
+  - predicate: 'gvk == "storage.k8s.io/v1/CSIDriver" && name == "nfs.csi.k8s.io"'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "nfs.csi.k8s.io/node"))]'
+  - predicate: 'gvk == "apps/v1/DaemonSet" && name == "csi-nfs-node" && ns == "kube-system"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "nfs.csi.k8s.io/node"))]'

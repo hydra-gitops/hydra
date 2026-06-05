@@ -1,0 +1,31 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  namespace: demo
+  name: my-monitor
+spec:
+  selector:
+    matchLabels:
+      app: my-service
+  endpoints:
+    - port: metrics
+      interval: 30s
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: monitoring
+  name: kube-prometheus-stack-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kube-prometheus-stack-operator
+  template:
+    metadata:
+      labels:
+        app: kube-prometheus-stack-operator
+    spec:
+      containers:
+        - name: prometheus-operator
+          image: quay.io/prometheus-operator/prometheus-operator:v0.72.0

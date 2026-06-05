@@ -1,0 +1,59 @@
+refDefinitions:
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: batch/v1/CronJob/default/my-cronjob
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+      label: envFrom
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: batch/v1/CronJob/default/my-cronjob
+      to: v1/ConfigMap/default/my-config
+      labels:
+        - envFrom
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: batch/v1/CronJob/default/my-cronjob
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/default/my-config
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

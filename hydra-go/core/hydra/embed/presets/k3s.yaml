@@ -1,0 +1,75 @@
+# Builtin cluster-defaults preset: K3s distribution CRDs, controller RBAC, RuntimeClasses, and kube-system config.
+# Per-Addon matching lives in k3s-addon-* presets (each activates the Hydra preset for that workload where applicable).
+# kube-controller-manager + kube-scheduler cover kubeadm-style control-plane RBAC often present on K3s.
+id: k3s
+defaultEnabled: false
+activates:
+  - kube-controller-manager
+  - kube-scheduler
+  - k3s-addon-aggregated-metrics-reader
+  - k3s-addon-auth-delegator
+  - k3s-addon-auth-reader
+  - k3s-addon-ccm
+  - k3s-addon-coredns
+  - k3s-addon-local-storage
+  - k3s-addon-metrics-apiservice
+  - k3s-addon-metrics-server-deployment
+  - k3s-addon-metrics-server-service
+  - k3s-addon-resource-reader
+  - k3s-addon-rolebindings
+  - k3s-addon-runtimes
+  - k3s-addon-traefik
+predicates:
+  crds:
+    ids:
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//addons.k3s.cattle.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//etcdsnapshotfiles.k3s.cattle.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//helmchartconfigs.helm.cattle.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//helmcharts.helm.cattle.io'
+  runtimeclasses:
+    ids:
+      - 'node.k8s.io/v1/RuntimeClass//crun'
+      - 'node.k8s.io/v1/RuntimeClass//lunatic'
+      - 'node.k8s.io/v1/RuntimeClass//nvidia'
+      - 'node.k8s.io/v1/RuntimeClass//nvidia-experimental'
+      - 'node.k8s.io/v1/RuntimeClass//slight'
+      - 'node.k8s.io/v1/RuntimeClass//spin'
+      - 'node.k8s.io/v1/RuntimeClass//wasmedge'
+      - 'node.k8s.io/v1/RuntimeClass//wasmer'
+      - 'node.k8s.io/v1/RuntimeClass//wasmtime'
+      - 'node.k8s.io/v1/RuntimeClass//wws'
+  cluster-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//clustercidrs-node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//k3s-cloud-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:k3s-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//clustercidrs-node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//k3s-cloud-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//k3s-cloud-controller-manager-auth-delegator'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//kube-apiserver-kubelet-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:k3s-controller'
+  apiservices:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1.helm.cattle.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.k3s.cattle.io'
+  kube-system-config:
+    ids:
+      - 'v1/ConfigMap/kube-system/cluster-dns'
+      - 'v1/Secret/kube-system/k3s-serving'
+      - 'v1/ServiceAccount/kube-system/svclb'
+  events:
+    cel:
+      - gvk: events.k8s.io/v1/Event
+        namespace: kube-system
+        optional: true
+        cel: |
+          gvk(clusterEntity.regarding) == "k3s.cattle.io/v1/Addon"
+  servicelb-daemonsets:
+    cel:
+      - gvk: apps/v1/DaemonSet
+        namespace: kube-system
+        optional: true
+        cel: |
+          name.startsWith("svclb-") &&
+          clusterEntity.labels().getOrEmpty("svccontroller.k3s.cattle.io/svcname") != "" &&
+          clusterEntity.labels().getOrEmpty("svccontroller.k3s.cattle.io/svcnamespace") != ""

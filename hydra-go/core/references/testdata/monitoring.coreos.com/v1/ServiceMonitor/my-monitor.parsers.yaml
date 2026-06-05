@@ -1,0 +1,7 @@
+ref-parsers:
+  - predicate: 'gvk.startsWith("monitoring.coreos.com/")'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "prometheus"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "kube-prometheus-stack-operator"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "prometheus"))]'

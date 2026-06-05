@@ -1,0 +1,66 @@
+refDefinitions:
+    - owner: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+    - owner: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Service/default/my-service
+      label: service
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/Service/default/my-service
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: service
+        value: default/my-service
+      label: service
+refs:
+    - refType: direct
+      endpointType: id
+      from: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: discovery.k8s.io/v1/EndpointSlice/default/my-service-abc
+      to: v1/Service/default/my-service
+      labels:
+        - service
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/Service/default/my-service
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

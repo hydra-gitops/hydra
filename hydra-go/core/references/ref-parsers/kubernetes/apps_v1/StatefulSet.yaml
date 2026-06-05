@@ -1,0 +1,76 @@
+ref-parsers:
+  - gvk: apps/v1/StatefulSet
+    pick:
+      # StatefulSet -> Secret (imagePullSecrets)
+      - cel: "entity.spec.template.spec.imagePullSecrets.map(ips, refBuilder().outgoing(id('v1/Secret', ns, ips.name)))"
+        label: imagePullSecret
+      # StatefulSet -> ServiceAccount
+      - cel: "[refBuilder().outgoing(id('v1/ServiceAccount', ns, entity.spec.template.spec.serviceAccountName))]"
+        label: serviceAccount
+      # StatefulSet -> ConfigMap (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.configMap)).map(v, (has(v.configMap.optional) && v.configMap.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, v.configMap.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, v.configMap.name))))"
+        label: volume
+      # StatefulSet -> Secret (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.secret)).map(v, (has(v.secret.optional) && v.secret.optional ? refBuilder().outgoing(id('v1/Secret', ns, v.secret.secretName)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, v.secret.secretName))))"
+        label: volume
+      # StatefulSet -> PersistentVolumeClaim (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.persistentVolumeClaim)).map(v, refBuilder().outgoing(id('v1/PersistentVolumeClaim', ns, v.persistentVolumeClaim.claimName)))"
+        label: volume
+      # StatefulSet -> StorageClass (volumeClaimTemplates)
+      - cel: "has(entity.spec.volumeClaimTemplates) ? entity.spec.volumeClaimTemplates.filter(vct, has(vct.spec) && has(vct.spec.storageClassName) && vct.spec.storageClassName != null && vct.spec.storageClassName != \"\").map(vct, refBuilder().outgoing(id('storage.k8s.io/v1/StorageClass', '', vct.spec.storageClassName))) : []"
+        label: "volumeClaimTemplate storageClass"
+      # StatefulSet -> PersistentVolumeClaim (volumeClaimTemplates; expected names per replica ordinal)
+      - cel: |
+          has(entity.spec.volumeClaimTemplates) ? entity.spec.volumeClaimTemplates.filter(vct, has(vct.metadata) && has(vct.metadata.name) && vct.metadata.name != "").map(vct,
+            ordinalRange(
+              (has(entity.spec.ordinals) && has(entity.spec.ordinals.start) && entity.spec.ordinals.start != null) ? int(entity.spec.ordinals.start) : 0,
+              (has(entity.spec.replicas) && entity.spec.replicas != null) ? int(entity.spec.replicas) : 1
+            ).map(i, refBuilder().outgoing(id('v1/PersistentVolumeClaim', ns, vct.metadata.name + '-' + string(name) + '-' + string(i))))
+          ).flatten() : []
+        label: volumeClaimTemplate
+        attributes:
+          - "origin:generated": controller
+      # StatefulSet -> PersistentVolumeClaim (live cluster inventory; cluster review source overlay only)
+      - cel: |
+          has(entity.spec.volumeClaimTemplates) ? entity.spec.volumeClaimTemplates.filter(vct, has(vct.metadata) && has(vct.metadata.name) && vct.metadata.name != "").map(vct,
+            clusterEntities({"namespace": ns, "gvk": "v1/PersistentVolumeClaim"}).filter(c, has(c.name) && vctPvcOrdinalName(c.name, vct.metadata.name, string(name))
+              && has(c.clusterEntity) && has(c.clusterEntity.metadata) && has(c.clusterEntity.metadata.ownerReferences)
+              && c.clusterEntity.metadata.ownerReferences.exists(o,
+                has(o.controller) && o.controller && o.kind == 'StatefulSet' && o.name == string(name) && o.apiVersion == 'apps/v1')
+            ).map(c, refBuilder().outgoing(id('v1/PersistentVolumeClaim', ns, c.name)))
+          ).flatten() : []
+        label: volumeClaimTemplate
+        attributes:
+          - "origin:generated": controller
+      # StatefulSet -> ConfigMap (envFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.configMapRef)).map(e, (has(e.configMapRef.optional) && e.configMapRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)))) : []).flatten()"
+        label: envFrom
+      # StatefulSet -> Secret (envFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.secretRef)).map(e, (has(e.secretRef.optional) && e.secretRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)))) : []).flatten()"
+        label: envFrom
+      # StatefulSet -> ConfigMap (env valueFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.configMapKeyRef)).map(e, (has(e.valueFrom.configMapKeyRef.optional) && e.valueFrom.configMapKeyRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)))) : []).flatten()"
+        label: env
+      # StatefulSet -> Secret (env valueFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.secretKeyRef)).map(e, (has(e.valueFrom.secretKeyRef.optional) && e.valueFrom.secretKeyRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)))) : []).flatten()"
+        label: env
+      # StatefulSet -> ConfigMap (projected volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.projected)).map(v, v.projected.sources.filter(s, has(s.configMap)).map(s, (has(s.configMap.optional) && s.configMap.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, s.configMap.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, s.configMap.name))))).flatten()"
+        label: volume
+      # StatefulSet -> Secret (projected volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.projected)).map(v, v.projected.sources.filter(s, has(s.secret)).map(s, (has(s.secret.optional) && s.secret.optional ? refBuilder().outgoing(id('v1/Secret', ns, s.secret.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, s.secret.name))))).flatten()"
+        label: volume
+      # StatefulSet -> ConfigMap (initContainers envFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.configMapRef)).map(e, (has(e.configMapRef.optional) && e.configMapRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)))) : []).flatten()"
+        label: "initContainer envFrom"
+      # StatefulSet -> Secret (initContainers envFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.secretRef)).map(e, (has(e.secretRef.optional) && e.secretRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)))) : []).flatten()"
+        label: "initContainer envFrom"
+      # StatefulSet -> ConfigMap (initContainers env valueFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.configMapKeyRef)).map(e, (has(e.valueFrom.configMapKeyRef.optional) && e.valueFrom.configMapKeyRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)))) : []).flatten()"
+        label: "initContainer env"
+      # StatefulSet -> Secret (initContainers env valueFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.secretKeyRef)).map(e, (has(e.valueFrom.secretKeyRef.optional) && e.valueFrom.secretKeyRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)))) : []).flatten()"
+        label: "initContainer env"
+      # StatefulSet -> Service (label selector matching via pod template labels)
+      - cel: "matchingServices(ns, entity.spec.template.metadata.labels).map(s, refBuilder().incoming(ref('service', s)))"

@@ -1,0 +1,6 @@
+/hydra-go/hydra
+/dist
+__debug_bin*
+node_modules
+__pycache__
+*.test

@@ -1,0 +1,10 @@
+ref-parsers:
+  - predicate: 'gvk.startsWith("cert-manager.io/")'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "cert-manager"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "cert-manager"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "cert-manager"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "cert-manager-webhook"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "cert-manager"))]'

@@ -1,0 +1,15 @@
+# Builtin cluster-defaults preset: kube-controller-manager bootstrap RBAC and kubeadm-style leader lease.
+# Activated by talos and metakube (off on stacks without these objects, e.g. K3s/k3d).
+id: kube-controller-manager
+defaultEnabled: false
+predicates:
+  control-plane:
+    ids:
+      - id: 'coordination.k8s.io/v1/Lease/kube-system/kube-controller-manager'
+        optional: true
+      - id: 'v1/ServiceAccount/kube-system/kube-controller-manager'
+        optional: true
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kube-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kube-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/system::leader-locking-kube-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system::leader-locking-kube-controller-manager'

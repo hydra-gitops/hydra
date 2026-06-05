@@ -1,0 +1,101 @@
+refDefinitions:
+    - owner: apps/v1/StatefulSet/default/web
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/StatefulSet/default/web
+    - owner: apps/v1/StatefulSet/default/web
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: apps/v1/StatefulSet/default/web
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/data-web-5
+      label: volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+    - owner: apps/v1/StatefulSet/default/web
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/data-web-6
+      label: volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+    - owner: apps/v1/StatefulSet/default/web
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/data-web-7
+      label: volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/web
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/web
+      to: v1/PersistentVolumeClaim/default/data-web-5
+      labels:
+        - volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/web
+      to: v1/PersistentVolumeClaim/default/data-web-6
+      labels:
+        - volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/web
+      to: v1/PersistentVolumeClaim/default/data-web-7
+      labels:
+        - volumeClaimTemplate
+      attributes:
+        - origin:generated: controller
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolumeClaim/default/data-web-5
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolumeClaim/default/data-web-6
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolumeClaim/default/data-web-7
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

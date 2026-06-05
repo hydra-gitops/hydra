@@ -1,0 +1,20 @@
+# Builtin cluster-defaults preset: k3s local-path dynamic provisioning (Deployment, StorageClass, RBAC).
+# The k3s Addon CR is matched by k3s-addon-local-storage, which activates this preset.
+# Default off; activated by k3s-addon-local-storage (and transitively by k3s / k3d).
+id: local-path-provisioner
+defaultEnabled: false
+predicates:
+  workloads:
+    ids:
+      - 'apps/v1/Deployment/kube-system/local-path-provisioner'
+  cluster-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//local-path-provisioner-role'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//local-path-provisioner-bind'
+  storage:
+    ids:
+      - 'storage.k8s.io/v1/StorageClass//local-path'
+  kube-system:
+    ids:
+      - 'v1/ConfigMap/kube-system/local-path-config'
+      - 'v1/ServiceAccount/kube-system/local-path-provisioner-service-account'

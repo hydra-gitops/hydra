@@ -1,0 +1,19 @@
+ref-parsers:
+  # RoleBinding -> Role
+  - gvk: rbac.authorization.k8s.io/v1/RoleBinding
+    label: roleRef
+    pick:
+      - cel: "entity.roleRef.kind == 'Role' ? [refBuilder().outgoing(id('rbac.authorization.k8s.io/v1/Role', ns, entity.roleRef.name))] : []"
+
+  # RoleBinding -> ClusterRole (when roleRef.kind is ClusterRole)
+  - gvk: rbac.authorization.k8s.io/v1/RoleBinding
+    label: roleRef
+    pick:
+      - cel: "entity.roleRef.kind == 'ClusterRole' ? [refBuilder().outgoing(id('rbac.authorization.k8s.io/v1/ClusterRole', '', entity.roleRef.name))] : []"
+
+  # RoleBinding -> ServiceAccount (subjects)
+  - gvk: rbac.authorization.k8s.io/v1/RoleBinding
+    pick:
+      - cel: "entity.subjects.filter(s, s.kind == 'ServiceAccount').map(s, refBuilder().outgoing(id('v1/ServiceAccount', s.namespace, s.name)))"
+        label: subject
+        reverse: true

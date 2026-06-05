@@ -1,0 +1,9 @@
+# Builtin: k3s.cattle.io Addon kube-system/resource-reader — activates metrics-server.
+id: k3s-addon-resource-reader
+defaultEnabled: false
+activates:
+  - metrics-server
+predicates:
+  addon:
+    ids:
+      - 'k3s.cattle.io/v1/Addon/kube-system/resource-reader'

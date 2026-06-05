@@ -1,0 +1,7 @@
+ref-parsers:
+  # StorageClass -> CSIDriver
+  - gvk: storage.k8s.io/v1/StorageClass
+    cel: "has(entity.provisioner)"
+    pick:
+      - cel: "[refBuilder().outgoing(id('storage.k8s.io/v1/CSIDriver', '', entity.provisioner))]"
+        label: provisioner

@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-config
+  namespace: argocd
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-config-2
+  namespace: argocd
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: repo-server
+  template:
+    metadata:
+      labels:
+        app: repo-server
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          envFrom:
+            - configMapRef:
+                name: shared-config
+            - configMapRef:
+                name: shared-config-2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server-worker
+  namespace: argocd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: repo-worker
+  template:
+    metadata:
+      labels:
+        app: repo-worker
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          envFrom:
+            - configMapRef:
+                name: shared-config
+            - configMapRef:
+                name: shared-config-2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  selector:
+    app: repo-server
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-repo-server-metrics
+  namespace: argocd
+spec:
+  selector:
+    app: repo-server
+  ports:
+    - port: 9090
+      targetPort: 9090

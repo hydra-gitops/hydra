@@ -1,0 +1,71 @@
+# Pod and PodMetrics: metrics.k8s.io mirrors pod namespace/name (same metadata.namespace/name as v1/Pod).
+# Workload controller -> PodMetrics edges cover uninstall / inspect when the owning Pod and
+# ReplicaSet/Job have already disappeared but metrics.k8s.io still returns the stale PodMetrics row.
+ref-parsers:
+  - gvk: apps/v1/Deployment
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''-[a-z0-9]+-[a-z0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: apps/v1/StatefulSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''-[0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: apps/v1/DaemonSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''-[a-z0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: apps/v1/ReplicaSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''-[a-z0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: batch/v1/Job
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''(-[0-9]+)?-[a-z0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: batch/v1/CronJob
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: 'clusterEntities({"namespace": ns, "gvk": "metrics.k8s.io/v1beta1/PodMetrics"}).filter(e, e.name.matches(''^'' + string(name) + ''-[0-9]+-[a-z0-9]+$'')).map(e, refBuilder().outgoing(id(''metrics.k8s.io/v1beta1/PodMetrics'', ns, e.name)).label(''podMetrics''))'
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: v1/Pod
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: "[refBuilder().outgoing(id('metrics.k8s.io/v1beta1/PodMetrics', ns, name))]"
+        label: podMetrics
+        attributes:
+          - hydra:parent-via: podMetrics
+          - hydra:parent-direction: incoming
+  - gvk: metrics.k8s.io/v1beta1/PodMetrics
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/Pod', ns, name))]"
+        label: podMetricsPod

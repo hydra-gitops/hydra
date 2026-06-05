@@ -1,0 +1,49 @@
+# Builtin cluster-defaults preset: k3s metrics-server workload (Deployment, RBAC, Service, metrics API views).
+# Addon CRs are matched by k3s-addon-* presets, which activate this preset.
+# Default off; activated by syseleven, k3s-addon-metrics-* / k3s-addon-auth-* / k3s-addon-resource-reader / k3s-addon-aggregated-metrics-reader (and transitively by k3s / k3d).
+id: metrics-server
+defaultEnabled: false
+predicates:
+  workloads:
+    ids:
+      - 'apps/v1/Deployment/kube-system/metrics-server'
+  cluster-rbac:
+    ids:
+      - id: 'rbac.authorization.k8s.io/v1/ClusterRole//system:aggregated-metrics-reader'
+        optional: true
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:metrics-server'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//metrics-server:system:auth-delegator'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:metrics-server'
+  rolebindings:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/metrics-server-auth-reader'
+  kube-system:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1beta1.metrics.k8s.io'
+      - 'v1/Service/kube-system/metrics-server'
+      - 'v1/ServiceAccount/kube-system/metrics-server'
+      - id: 'v1/Secret/kube-system/metrics-server-serving-cert'
+        optional: true
+    cel:
+      - gvk: v1/Secret
+        namespace: kube-system
+        cel: 'name.startsWith("metrics-server")'
+        optional: true
+  disruption:
+    cel:
+      - gvk: policy/v1/PodDisruptionBudget
+        namespace: kube-system
+        name: metrics-server
+        optional: true
+      - gvk: policy/v1beta1/PodDisruptionBudget
+        namespace: kube-system
+        name: metrics-server
+        optional: true
+  metrics-api:
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/NodeMetrics
+        optional: true
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^metrics-server-.*")'
+        optional: true

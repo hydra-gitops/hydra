@@ -1,0 +1,9 @@
+apiVersion: authorization.k8s.io/v1
+kind: SelfSubjectAccessReview
+metadata:
+  name: can-i-get-pods
+spec:
+  resourceAttributes:
+    namespace: default
+    verb: get
+    resource: pods

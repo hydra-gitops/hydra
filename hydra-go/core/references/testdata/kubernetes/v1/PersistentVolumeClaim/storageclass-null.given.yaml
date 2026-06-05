@@ -1,0 +1,13 @@
+# storageClassName: null must not emit a StorageClass ref or fail CEL evaluation.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc-null-sc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: null

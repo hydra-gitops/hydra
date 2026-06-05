@@ -1,0 +1,80 @@
+refDefinitions:
+    - owner: apps/v1/Deployment/kyverno/kyverno-admission-controller
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/kyverno/kyverno-admission-controller
+    - owner: apps/v1/Deployment/kyverno/kyverno-admission-controller
+      type: direct
+      direction: incoming
+      endpoint:
+        type: provider
+        value: kyverno
+    - owner: apps/v1/Deployment/kyverno/kyverno-admission-controller
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//kyverno
+      label: namespace
+    - owner: apps/v1/Deployment/kyverno/kyverno-background-controller
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/kyverno/kyverno-background-controller
+    - owner: apps/v1/Deployment/kyverno/kyverno-background-controller
+      type: direct
+      direction: incoming
+      endpoint:
+        type: provider
+        value: kyverno
+    - owner: apps/v1/Deployment/kyverno/kyverno-background-controller
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//kyverno
+      label: namespace
+    - owner: kyverno.io/v1/ClusterPolicy//disallow-latest-tag
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: kyverno.io/v1/ClusterPolicy//disallow-latest-tag
+    - owner: kyverno.io/v1/ClusterPolicy//disallow-latest-tag
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: provider
+        value: kyverno
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/kyverno/kyverno-admission-controller
+      to: v1/Namespace//kyverno
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/kyverno/kyverno-background-controller
+      to: v1/Namespace//kyverno
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: provider
+      from: kyverno.io/v1/ClusterPolicy//disallow-latest-tag
+      to: apps/v1/Deployment/kyverno/kyverno-admission-controller
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: provider
+      from: kyverno.io/v1/ClusterPolicy//disallow-latest-tag
+      to: apps/v1/Deployment/kyverno/kyverno-background-controller
+      attributes:
+        - origin:source: test

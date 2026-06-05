@@ -1,0 +1,3 @@
+apiVersion: v2
+name: skip-crds-chart
+version: 0.1.0

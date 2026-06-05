@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: busybox
+          command: ["echo", "hello"]
+          env:
+            - name: MY_VAR
+              valueFrom:
+                configMapKeyRef:
+                  name: my-config
+                  key: MY_KEY
+      restartPolicy: Never
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  MY_KEY: my-value

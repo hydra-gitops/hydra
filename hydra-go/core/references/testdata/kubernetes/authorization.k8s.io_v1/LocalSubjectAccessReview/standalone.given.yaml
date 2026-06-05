@@ -1,0 +1,11 @@
+apiVersion: authorization.k8s.io/v1
+kind: LocalSubjectAccessReview
+metadata:
+  name: local-check
+  namespace: default
+spec:
+  user: "jane@example.com"
+  resourceAttributes:
+    namespace: default
+    verb: get
+    resource: pods

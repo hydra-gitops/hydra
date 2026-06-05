@@ -1,0 +1,31 @@
+apiVersion: clickhouse.altinity.com/v1
+kind: ClickHouseInstallation
+metadata:
+  namespace: demo-infra
+  name: my-chi
+spec:
+  configuration:
+    clusters:
+      - name: default
+        layout:
+          shardsCount: 1
+          replicasCount: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: demo-infra
+  name: operator-clickhouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse-operator
+  template:
+    metadata:
+      labels:
+        app: clickhouse-operator
+    spec:
+      containers:
+        - name: clickhouse-operator
+          image: altinity/clickhouse-operator:0.23.0

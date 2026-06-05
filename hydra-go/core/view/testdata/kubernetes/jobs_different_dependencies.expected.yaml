@@ -1,0 +1,142 @@
+entities:
+    - id: batch/v1/Job/monitoring/admission-create
+      templatePath: unknown-7.yaml
+      templateIndex: 1
+    - id: batch/v1/Job/monitoring/admission-patch
+      templatePath: unknown-8.yaml
+      templateIndex: 1
+    - id: rbac.authorization.k8s.io/v1/Role/monitoring/create-role
+      templatePath: unknown-3.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - ""
+          resources:
+            - secrets
+          verbs:
+            - create
+    - id: rbac.authorization.k8s.io/v1/Role/monitoring/patch-role
+      templatePath: unknown-5.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - ""
+          resources:
+            - secrets
+          verbs:
+            - patch
+    - id: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/create-rb
+      templatePath: unknown-4.yaml
+      templateIndex: 1
+    - id: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/patch-rb
+      templatePath: unknown-6.yaml
+      templateIndex: 1
+    - id: v1/Namespace//monitoring
+      tags:
+        - app:missing
+    - id: v1/ServiceAccount/monitoring/create-sa
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+    - id: v1/ServiceAccount/monitoring/patch-sa
+      templatePath: unknown-2.yaml
+      templateIndex: 1
+groups:
+    - name: admission-create (Job)
+      ids:
+        - batch/v1/Job/monitoring/admission-create
+        - rbac.authorization.k8s.io/v1/Role/monitoring/create-role
+        - rbac.authorization.k8s.io/v1/RoleBinding/monitoring/create-rb
+        - v1/ServiceAccount/monitoring/create-sa
+    - name: admission-patch (Job)
+      ids:
+        - batch/v1/Job/monitoring/admission-patch
+        - rbac.authorization.k8s.io/v1/Role/monitoring/patch-role
+        - rbac.authorization.k8s.io/v1/RoleBinding/monitoring/patch-rb
+        - v1/ServiceAccount/monitoring/patch-sa
+references:
+    - from: batch/v1/Job/monitoring/admission-create
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: batch/v1/Job/monitoring/admission-create
+      to: v1/ServiceAccount/monitoring/create-sa
+      labels:
+        - serviceAccount
+      attributes:
+        - origin:source: template
+    - from: batch/v1/Job/monitoring/admission-patch
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: batch/v1/Job/monitoring/admission-patch
+      to: v1/ServiceAccount/monitoring/patch-sa
+      labels:
+        - serviceAccount
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/Role/monitoring/create-role
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/Role/monitoring/patch-role
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/create-rb
+      to: rbac.authorization.k8s.io/v1/Role/monitoring/create-role
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/create-rb
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/create-rb
+      to: v1/ServiceAccount/monitoring/create-sa
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/patch-rb
+      to: rbac.authorization.k8s.io/v1/Role/monitoring/patch-role
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/patch-rb
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/monitoring/patch-rb
+      to: v1/ServiceAccount/monitoring/patch-sa
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: v1/ServiceAccount/monitoring/create-sa
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ServiceAccount/monitoring/patch-sa
+      to: v1/Namespace//monitoring
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template

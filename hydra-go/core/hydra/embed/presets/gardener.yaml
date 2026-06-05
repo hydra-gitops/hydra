@@ -1,0 +1,116 @@
+# Builtin cluster-defaults preset: Gardener shoot control-plane agents and target-cluster RBAC.
+id: gardener
+defaultEnabled: false
+activates:
+  - kube-controller-manager
+  - kube-scheduler
+  - monex
+  - '!kube-proxy'
+  - '!cinder-controller'
+predicates:
+  workloads:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/apiserver-proxy'
+      - 'apps/v1/DaemonSet/kube-system/node-exporter'
+      - 'apps/v1/DaemonSet/kube-system/node-problem-detector'
+      - 'apps/v1/StatefulSet/kube-system/vpn-shoot'
+    cel:
+      - gvk: apps/v1/DaemonSet
+        namespace: kube-system
+        cel: 'name.matches("^kube-proxy-mgmt-v[0-9]+\\.[0-9]+\\.[0-9]+$")'
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^apiserver-proxy-.*") || name.matches("^node-exporter-.*") || name.matches("^node-problem-detector-.*") || name.matches("^vpn-shoot-.*") || name.matches("^kube-proxy-mgmt-v[0-9]+\\.[0-9]+\\.[0-9]+-.*")'
+  config:
+    ids:
+      - 'v1/ConfigMap/kube-system/cluster-autoscaler-status'
+      - 'v1/ConfigMap/kube-system/cluster-identity'
+      - 'v1/ConfigMap/kube-system/shoot-info'
+    cel:
+      - gvk: v1/ConfigMap
+        namespace: kube-system
+        cel: 'name.matches("^apiserver-proxy-config-[a-f0-9]+$") || name.matches("^kube-proxy-cleanup-script-[a-f0-9]+$") || name.matches("^kube-proxy-config-[a-f0-9]+$") || name.matches("^kube-proxy-conntrack-fix-script-[a-f0-9]+$")'
+  secrets:
+    ids:
+      - 'v1/Secret/kube-system/cloud-provider-config'
+    cel:
+      - gvk: v1/Secret
+        namespace: kube-system
+        cel: 'name.matches("^gardener-node-agent-mgmt-[a-f0-9]+$") || name.matches("^kube-proxy-[a-f0-9]+$") || name.matches("^vpn-shoot-ca-[a-f0-9]+$") || name.matches("^vpn-shoot-client-[0-9]+-[a-f0-9]+$") || name.matches("^vpn-shoot-tlsauth-[a-f0-9]+$")'
+  services:
+    ids:
+      - 'v1/Service/kube-system/apiserver-proxy'
+      - 'v1/Service/kube-system/kube-proxy'
+      - 'v1/Service/kube-system/node-exporter'
+      - 'v1/Service/kube-system/node-problem-detector'
+  serviceaccounts:
+    ids:
+      - 'v1/ServiceAccount/kube-system/kube-proxy'
+      - 'v1/ServiceAccount/kube-system/apiserver-proxy'
+      - 'v1/ServiceAccount/kube-system/cloud-controller-manager'
+      - 'v1/ServiceAccount/kube-system/cluster-autoscaler'
+      - 'v1/ServiceAccount/kube-system/dependency-watchdog-probe'
+      - 'v1/ServiceAccount/kube-system/event-logger'
+      - 'v1/ServiceAccount/kube-system/gardener'
+      - 'v1/ServiceAccount/kube-system/gardener-internal'
+      - 'v1/ServiceAccount/kube-system/gardener-resource-manager'
+      - 'v1/ServiceAccount/kube-system/machine-controller-manager'
+      - 'v1/ServiceAccount/kube-system/node-exporter'
+      - 'v1/ServiceAccount/kube-system/node-problem-detector'
+      - 'v1/ServiceAccount/kube-system/vpn-shoot'
+  admission:
+    ids:
+      - 'admissionregistration.k8s.io/v1/MutatingWebhookConfiguration//gardener-resource-manager-shoot'
+  leases:
+    ids:
+      - 'coordination.k8s.io/v1/Lease/kube-system/cloud-controller-manager'
+      - 'coordination.k8s.io/v1/Lease/kube-system/cluster-autoscaler'
+  network-policies:
+    cel:
+      - gvk: networking.k8s.io/v1/NetworkPolicy
+        namespace: kube-system
+        cel: 'name.matches("^gardener\\.cloud--.*")'
+  pdb:
+    ids:
+      - 'policy/v1/PodDisruptionBudget/kube-system/vpn-shoot'
+  rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//event-logger'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gardener.cloud:system:read-only'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gardener.cloud:target:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gardener.cloud:target:dependency-watchdog'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gardener.cloud:target:machine-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//node-problem-detector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:apiserver:kubelet'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:cloud-node-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:logging:event-logger'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:project:admins'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:project:viewers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:system:admins'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:system:gardener'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:system:viewers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:dependency-watchdog'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:kube-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:kube-scheduler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:kube-scheduler-volume'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:machine-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:node-proxier'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gardener.cloud:target:resource-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//node-problem-detector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:apiserver:kubelet'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:certificates.k8s.io:certificatesigningrequests:nodeclient'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:certificates.k8s.io:certificatesigningrequests:selfnodeclient'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:cloud-node-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:node-bootstrapper'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-node-lease/gardener.cloud:target:dependency-watchdog'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/gardener.cloud:target:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/gardener.cloud:target:machine-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-node-lease/gardener.cloud:target:dependency-watchdog'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/gardener.cloud:target:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/gardener.cloud:target:machine-controller-manager'
+  certificates:
+    cel:
+      - gvk: certificates.k8s.io/v1/CertificateSigningRequest
+        cel: 'name.matches("^csr-[a-z0-9]+$")'
+        optional: true

@@ -1,0 +1,74 @@
+ref-parsers:
+  # All entities get an incoming reference to themselves
+  - predicate: "true"
+    pick:
+      - cel: "[refBuilder().incoming(id(gvk, ns, name))]"
+
+  # All namespaced entities depend on their namespace
+  - predicate: "ns != ''"
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/Namespace', '', ns))]"
+        label: namespace
+
+  # All Custom Resources (entities whose GVK is defined by a CRD) get an outgoing ref to their CRD
+  - predicate: "gvk in CRDs"
+    pick:
+      - cel: "[refBuilder().outgoing(ref('crd', gvk))]"
+        label: crd
+
+  # CRDs get incoming refs for all versions they define
+  - gvk: apiextensions.k8s.io/v1/CustomResourceDefinition
+    pick:
+      - cel: "entity.spec.versions.map(v, refBuilder().incoming(ref('crd', entity.spec.group + '/' + v.name + '/' + entity.spec.names.kind)))"
+
+  # Kubernetes metadata.ownerReferences: child -> owner (reverse affects display / dependency interpretation)
+  - predicate: "has(entity.metadata.ownerReferences) && entity.metadata.ownerReferences.size() > 0"
+    reverse: true
+    pick:
+      - cel: |
+          entity.metadata.ownerReferences.filter(o, has(o.controller) && o.controller).map(o,
+            has(o.blockOwnerDeletion) && o.blockOwnerDeletion ?
+              refBuilder().outgoing(id(o.apiVersion + '/' + o.kind, ns, o.name))
+                .attribute('kubernetes:ownerController', 'true')
+                .attribute('kubernetes:blockOwnerDeletion', 'true') :
+              refBuilder().outgoing(id(o.apiVersion + '/' + o.kind, ns, o.name))
+                .attribute('kubernetes:ownerController', 'true')
+          )
+        label: controller
+        attributes:
+          - "origin:owner": controller
+      - cel: |
+          entity.metadata.ownerReferences.filter(o, !has(o.controller) || !o.controller).map(o,
+            has(o.blockOwnerDeletion) && o.blockOwnerDeletion ?
+              refBuilder().outgoing(id(o.apiVersion + '/' + o.kind, ns, o.name))
+                .attribute('kubernetes:ownerController', 'false')
+                .attribute('kubernetes:blockOwnerDeletion', 'true') :
+              refBuilder().outgoing(id(o.apiVersion + '/' + o.kind, ns, o.name))
+                .attribute('kubernetes:ownerController', 'false')
+          )
+        label: owner
+        attributes:
+          - "origin:owner": dependent
+
+  # Rancher wrangler objectset.rio.cattle.io owner annotations (synthetic ownership metadata on objects).
+  # owner-gvk values look like "/v1, Kind=Service" or "apps/v1, Kind=Deployment"; see objectsetRioOwnerGvkToHydraGvk in hydra-go CEL.
+  # reverse: true — same contract as metadata.ownerReferences: stored edge is child -> declared owner, but logical
+  # dependency (scale, transitive refs, TUI) follows owner -> child so chains read Deployment -> Service -> svclb DaemonSet.
+  - predicate: |
+      has(entity.metadata.annotations)
+      && 'objectset.rio.cattle.io/owner-name' in entity.metadata.annotations
+      && 'objectset.rio.cattle.io/owner-gvk' in entity.metadata.annotations
+      && size(objectsetRioOwnerGvkToHydraGvk(string(entity.metadata.annotations['objectset.rio.cattle.io/owner-gvk']))) > 0
+    reverse: true
+    pick:
+      - cel: |
+          [refBuilder().outgoing(id(
+            objectsetRioOwnerGvkToHydraGvk(string(entity.metadata.annotations['objectset.rio.cattle.io/owner-gvk'])),
+            'objectset.rio.cattle.io/owner-namespace' in entity.metadata.annotations ? string(entity.metadata.annotations['objectset.rio.cattle.io/owner-namespace']) : '',
+            string(entity.metadata.annotations['objectset.rio.cattle.io/owner-name'])
+          ))]
+        label: objectset-owner
+        attributes:
+          - "origin:objectset": rio.cattle.io
+          - hydra:parent-via: objectset-owner
+          - hydra:parent-direction: outgoing

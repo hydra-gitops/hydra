@@ -1,0 +1,59 @@
+refDefinitions:
+    - owner: apps/v1/StatefulSet/default/my-statefulset
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/StatefulSet/default/my-statefulset
+    - owner: apps/v1/StatefulSet/default/my-statefulset
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+      label: env
+    - owner: apps/v1/StatefulSet/default/my-statefulset
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ConfigMap/default/my-config
+    - owner: v1/ConfigMap/default/my-config
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/my-statefulset
+      to: v1/ConfigMap/default/my-config
+      labels:
+        - env
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/StatefulSet/default/my-statefulset
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/default/my-config
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

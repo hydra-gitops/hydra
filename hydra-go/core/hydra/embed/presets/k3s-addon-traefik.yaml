@@ -1,0 +1,10 @@
+# Builtin: k3s.cattle.io Addon kube-system/traefik.
+id: k3s-addon-traefik
+defaultEnabled: false
+predicates:
+  addon:
+    ids:
+      - 'k3s.cattle.io/v1/Addon/kube-system/traefik'
+  deployment:
+    ids:
+      - 'apps/v1/Deployment/kube-system/traefik'

@@ -1,0 +1,66 @@
+refDefinitions:
+    - owner: networking.k8s.io/v1/Ingress/default/my-ingress
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: networking.k8s.io/v1/Ingress/default/my-ingress
+    - owner: networking.k8s.io/v1/Ingress/default/my-ingress
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: networking.k8s.io/v1/Ingress/default/my-ingress
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Service/default/my-service
+      label: ingress
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/Service/default/my-service
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: v1/Service/default/my-service
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: service
+        value: default/my-service
+      label: service
+refs:
+    - refType: direct
+      endpointType: id
+      from: networking.k8s.io/v1/Ingress/default/my-ingress
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: networking.k8s.io/v1/Ingress/default/my-ingress
+      to: v1/Service/default/my-service
+      labels:
+        - ingress
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/Service/default/my-service
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

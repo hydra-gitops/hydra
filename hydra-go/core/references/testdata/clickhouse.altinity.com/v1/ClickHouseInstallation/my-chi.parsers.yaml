@@ -1,0 +1,7 @@
+ref-parsers:
+  - predicate: 'gvk.startsWith("clickhouse.altinity.com/") || gvk.startsWith("clickhouse-keeper.altinity.com/")'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "clickhouse-operator"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "operator-clickhouse"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "clickhouse-operator"))]'

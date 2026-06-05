@@ -1,0 +1,6 @@
+ref-parsers:
+  # EndpointSlice -> Service
+  - gvk: discovery.k8s.io/v1/EndpointSlice
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/Service', ns, entity.metadata.labels['kubernetes.io/service-name']))]"
+        label: service

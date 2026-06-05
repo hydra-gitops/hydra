@@ -1,0 +1,8 @@
+refDefinitions:
+    - owner: authentication.k8s.io/v1/TokenReview//validate-token
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: authentication.k8s.io/v1/TokenReview//validate-token
+refs: []

@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: v1/ServiceAccount/default/standalone-sa
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/default/standalone-sa
+    - owner: v1/ServiceAccount/default/standalone-sa
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: v1/ServiceAccount/default/standalone-sa
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

@@ -1,0 +1,44 @@
+refDefinitions:
+    - owner: apps/v1/Deployment/demo-infra/strimzi-cluster-operator
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/demo-infra/strimzi-cluster-operator
+    - owner: apps/v1/Deployment/demo-infra/strimzi-cluster-operator
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//demo-infra
+      label: namespace
+    - owner: kafka.strimzi.io/v1beta2/Kafka/demo/demo-kafka
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: kafka.strimzi.io/v1beta2/Kafka/demo/demo-kafka
+    - owner: kafka.strimzi.io/v1beta2/Kafka/demo/demo-kafka
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//demo
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/demo-infra/strimzi-cluster-operator
+      to: v1/Namespace//demo-infra
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: kafka.strimzi.io/v1beta2/Kafka/demo/demo-kafka
+      to: v1/Namespace//demo
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

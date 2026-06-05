@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "repo-markdownlint",
+  "version": "1.0.0",
+  "description": "Local markdown lint tooling for repository docs",
+  "devDependencies": {
+    "markdownlint-cli": "0.48.0"
+  }
+}

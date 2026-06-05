@@ -1,0 +1,64 @@
+# Chain: StatefulSet -> StorageClass -> CSIDriver -> DaemonSet
+# Demonstrates that built-in storage refs and chart-defined CSI provider refs can form a workload dependency chain.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: activemq
+  namespace: demo
+spec:
+  serviceName: activemq
+  replicas: 1
+  selector:
+    matchLabels:
+      app: activemq
+  template:
+    metadata:
+      labels:
+        app: activemq
+    spec:
+      containers:
+        - name: activemq
+          image: harbor.example.com/activemq:latest
+  volumeClaimTemplates:
+    - metadata:
+        name: activemq-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
+        storageClassName: nfs-csi
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-csi
+provisioner: nfs.csi.k8s.io
+reclaimPolicy: Retain
+volumeBindingMode: Immediate
+---
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: nfs.csi.k8s.io
+spec:
+  attachRequired: false
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: csi-nfs-node
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: csi-nfs-node
+  template:
+    metadata:
+      labels:
+        app: csi-nfs-node
+    spec:
+      containers:
+        - name: nfs
+          image: registry.k8s.io/sig-storage/nfsplugin:v4.11.0

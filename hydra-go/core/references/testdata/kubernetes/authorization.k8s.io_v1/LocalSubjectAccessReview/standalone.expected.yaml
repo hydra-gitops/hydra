@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: authorization.k8s.io/v1/LocalSubjectAccessReview/default/local-check
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: authorization.k8s.io/v1/LocalSubjectAccessReview/default/local-check
+    - owner: authorization.k8s.io/v1/LocalSubjectAccessReview/default/local-check
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: authorization.k8s.io/v1/LocalSubjectAccessReview/default/local-check
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

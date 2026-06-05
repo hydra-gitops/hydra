@@ -1,0 +1,8 @@
+refDefinitions:
+    - owner: v1/PersistentVolume//my-pv
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/PersistentVolume//my-pv
+refs: []

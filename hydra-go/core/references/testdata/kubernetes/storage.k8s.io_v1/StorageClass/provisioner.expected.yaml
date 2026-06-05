@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: storage.k8s.io/v1/StorageClass//nfs-csi
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: storage.k8s.io/v1/StorageClass//nfs-csi
+    - owner: storage.k8s.io/v1/StorageClass//nfs-csi
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: storage.k8s.io/v1/CSIDriver//nfs.csi.k8s.io
+      label: provisioner
+refs:
+    - refType: direct
+      endpointType: id
+      from: storage.k8s.io/v1/StorageClass//nfs-csi
+      to: storage.k8s.io/v1/CSIDriver//nfs.csi.k8s.io
+      labels:
+        - provisioner
+      attributes:
+        - origin:source: test

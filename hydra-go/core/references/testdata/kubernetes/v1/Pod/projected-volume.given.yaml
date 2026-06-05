@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+  namespace: default
+spec:
+  containers:
+    - name: app
+      image: nginx
+      volumeMounts:
+        - name: projected-vol
+          mountPath: /etc/projected
+  volumes:
+    - name: projected-vol
+      projected:
+        sources:
+          - configMap:
+              name: my-config
+          - secret:
+              name: my-secret
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  config.yaml: "key: value"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+  namespace: default
+data:
+  secret.yaml: c2VjcmV0OiB2YWx1ZQ==

@@ -1,0 +1,7 @@
+# Builtin: k3s.cattle.io Addon kube-system/runtimes (RuntimeClass wiring).
+id: k3s-addon-runtimes
+defaultEnabled: false
+predicates:
+  addon:
+    ids:
+      - 'k3s.cattle.io/v1/Addon/kube-system/runtimes'

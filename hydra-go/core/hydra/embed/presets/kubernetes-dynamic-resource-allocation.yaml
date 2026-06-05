@@ -1,0 +1,15 @@
+# Builtin Kubernetes DynamicResourceAllocation defaults.
+# Kubernetes activates this automatically for 1.34+ where DRA is GA/default-on.
+# Clusters on 1.26-1.33 can enable this preset explicitly when the feature gate is enabled.
+id: kubernetes-dynamic-resource-allocation
+defaultEnabled: false
+predicates:
+  bootstrap-audit:
+    kubernetesMinorMin: 26
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:resource-claim-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:resource-claim-controller'
+  kube-system-serviceaccounts:
+    kubernetesMinorMin: 26
+    ids:
+      - 'v1/ServiceAccount/kube-system/resource-claim-controller'

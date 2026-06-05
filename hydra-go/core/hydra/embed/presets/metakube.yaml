@@ -1,0 +1,14 @@
+# Builtin cluster-defaults preset: SysEleven MetaKube bundle (cloud provider add-ons; activates cloudinit/cinder/kubermatic).
+id: metakube
+defaultEnabled: false
+activates:
+  - cloudinit
+  - cinder
+  - kubermatic
+  - kube-controller-manager
+  - kube-scheduler
+  - kube-proxy
+predicates:
+  kubeadm-kube-proxy:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//kubeadm:node-proxier'

@@ -1,0 +1,7 @@
+ref-parsers:
+  # PersistentVolume -> StorageClass
+  - gvk: v1/PersistentVolume
+    cel: "has(entity.spec.storageClassName) && entity.spec.storageClassName != null && entity.spec.storageClassName != \"\""
+    pick:
+      - cel: "[refBuilder().outgoing(id('storage.k8s.io/v1/StorageClass', '', entity.spec.storageClassName))]"
+        label: storageClass

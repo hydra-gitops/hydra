@@ -1,0 +1,8 @@
+refDefinitions:
+    - owner: authorization.k8s.io/v1/SubjectAccessReview//check-user-access
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: authorization.k8s.io/v1/SubjectAccessReview//check-user-access
+refs: []

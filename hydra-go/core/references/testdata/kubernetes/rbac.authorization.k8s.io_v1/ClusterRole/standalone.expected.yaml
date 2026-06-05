@@ -1,0 +1,8 @@
+refDefinitions:
+    - owner: rbac.authorization.k8s.io/v1/ClusterRole//cluster-pod-reader
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/ClusterRole//cluster-pod-reader
+refs: []

@@ -1,0 +1,45 @@
+refDefinitions:
+    - owner: apps/v1/ControllerRevision/default/my-controller-revision
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/ControllerRevision/default/my-controller-revision
+    - owner: apps/v1/ControllerRevision/default/my-controller-revision
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: apps/v1/DaemonSet/default/my-daemonset
+      label: owner
+      attributes:
+        - kubernetes:ownerController: "false"
+        - origin:owner: dependent
+      reverse: true
+    - owner: apps/v1/ControllerRevision/default/my-controller-revision
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/ControllerRevision/default/my-controller-revision
+      to: apps/v1/DaemonSet/default/my-daemonset
+      labels:
+        - owner
+      attributes:
+        - kubernetes:ownerController: "false"
+        - origin:owner: dependent
+        - origin:source: test
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: apps/v1/ControllerRevision/default/my-controller-revision
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

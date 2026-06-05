@@ -1,0 +1,83 @@
+# Builtin cluster-defaults preset: Canal (Flannel overlay) + Project Calico control plane.
+# Explicit ids are aligned with Calico/Canal-related lines in untracked.txt at repo root; update both when extending coverage.
+id: canal
+defaultEnabled: false
+activates:
+  - '!flannel'
+predicates:
+  deployment:
+    ids:
+      - 'apps/v1/Deployment/kube-system/calico-kube-controllers'
+  daemonset:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/canal'
+  calico-custom-resource-definitions:
+    ids:
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//adminnetworkpolicies.policy.networking.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//baselineadminnetworkpolicies.policy.networking.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgpconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgpfilters.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgppeers.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//blockaffinities.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//caliconodestatuses.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//clusterinformations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//felixconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//globalnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//globalnetworksets.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//hostendpoints.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamblocks.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamconfigs.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamhandles.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ippools.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipreservations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//kubecontrollersconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//networkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//networksets.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagedglobalnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagedkubernetesnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagednetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//tiers.crd.projectcalico.org'
+  calico-apiservice:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1.crd.projectcalico.org'
+  project-calico-cluster-resources:
+    ids:
+      - 'crd.projectcalico.org/v1/ClusterInformation//default'
+      - 'crd.projectcalico.org/v1/FelixConfiguration//default'
+      - 'crd.projectcalico.org/v1/IPPool//default-ipv4-ippool'
+      - 'crd.projectcalico.org/v1/KubeControllersConfiguration//default'
+      - 'crd.projectcalico.org/v1/Tier//adminnetworkpolicy'
+      - 'crd.projectcalico.org/v1/Tier//baselineadminnetworkpolicy'
+      - 'crd.projectcalico.org/v1/Tier//default'
+  cluster-rbac-calico-canal:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-cni-plugin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-kube-controllers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-tier-getter'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//flannel'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-cni-plugin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-kube-controllers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-tier-getter'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//canal-calico'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//canal-flannel'
+  kube-system-workloads:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/canal'
+      - 'apps/v1/Deployment/kube-system/calico-kube-controllers'
+      - 'v1/ConfigMap/kube-system/canal-config'
+      - 'v1/ServiceAccount/kube-system/canal'
+      - 'v1/ServiceAccount/kube-system/calico-cni-plugin'
+      - 'v1/ServiceAccount/kube-system/calico-kube-controllers'
+  kube-system-satellites:
+    cel:
+      - gvk: policy/v1/PodDisruptionBudget
+        namespace: kube-system
+        name: calico-kube-controllers
+      - gvk: policy/v1beta1/PodDisruptionBudget
+        namespace: kube-system
+        name: calico-kube-controllers
+        optional: true
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^canal-.*") || name.matches("^calico-kube-controllers-.*")'

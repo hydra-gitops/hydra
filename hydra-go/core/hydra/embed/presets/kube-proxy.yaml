@@ -1,0 +1,11 @@
+# Builtin cluster-defaults preset: kubeadm-style kube-proxy workload (DaemonSet + SA).
+# Activated by talos and metakube presets (inactive on minimal K3s/k3d where these objects are absent).
+id: kube-proxy
+defaultEnabled: false
+predicates:
+  daemonset:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/kube-proxy'
+  serviceaccount:
+    ids:
+      - 'v1/ServiceAccount/kube-system/kube-proxy'

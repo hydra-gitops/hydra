@@ -1,0 +1,50 @@
+name: Install goreleaser
+description: Install a pinned goreleaser binary on the runner
+
+runs:
+  using: composite
+  steps:
+    - name: Install cosign
+      uses: ./.github/actions/install-cosign
+
+    - name: Install goreleaser
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Shared with cosign; install-cosign documents why $HOME/.cosign is on PATH.
+        install_dir="${HOME}/.cosign"
+        # Version managed by renovate.json customManagers.
+        # renovate: datasource=github-releases depName=goreleaser/goreleaser
+        version="2.16.0"
+        release_base="https://github.com/goreleaser/goreleaser/releases/download/v${version}"
+        archive_name="goreleaser_Linux_x86_64.tar.gz"
+        checksums_name="checksums.txt"
+        bundle_name="checksums.txt.sigstore.json"
+        identity="https://github.com/goreleaser/goreleaser/.github/workflows/release.yml@refs/tags/v${version}"
+        oidc_issuer="https://token.actions.githubusercontent.com"
+        tmp_dir="$(mktemp -d)"
+
+        cleanup() {
+          rm -rf "${tmp_dir}"
+        }
+        trap cleanup EXIT
+
+        curl -fsSL "${release_base}/${archive_name}" -o "${tmp_dir}/${archive_name}"
+        curl -fsSL "${release_base}/${checksums_name}" -o "${tmp_dir}/${checksums_name}"
+        curl -fsSL "${release_base}/${bundle_name}" -o "${tmp_dir}/${bundle_name}"
+
+        cosign verify-blob \
+          --bundle "${tmp_dir}/${bundle_name}" \
+          --certificate-identity "${identity}" \
+          --certificate-oidc-issuer "${oidc_issuer}" \
+          "${tmp_dir}/${checksums_name}"
+
+        (
+          cd "${tmp_dir}"
+          sha256sum --check --ignore-missing "${checksums_name}"
+        )
+
+        tar -xzf "${tmp_dir}/${archive_name}" -C "${tmp_dir}"
+        mkdir -p "${install_dir}"
+        chmod +x "${tmp_dir}/goreleaser"
+        mv "${tmp_dir}/goreleaser" "${install_dir}/goreleaser"

@@ -1,0 +1,15 @@
+ref-parsers:
+  # PersistentVolumeClaim -> PersistentVolume
+  - gvk: v1/PersistentVolumeClaim
+    cel: "has(entity.spec.volumeName)"
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/PersistentVolume', '', entity.spec.volumeName))]"
+        tag:
+          - uninstall-force
+        label: volumeName
+  # PersistentVolumeClaim -> StorageClass
+  - gvk: v1/PersistentVolumeClaim
+    cel: "has(entity.spec.storageClassName) && entity.spec.storageClassName != null && entity.spec.storageClassName != \"\""
+    pick:
+      - cel: "[refBuilder().outgoing(id('storage.k8s.io/v1/StorageClass', '', entity.spec.storageClassName))]"
+        label: storageClass

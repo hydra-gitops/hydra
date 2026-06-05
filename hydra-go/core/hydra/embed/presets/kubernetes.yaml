@@ -1,0 +1,272 @@
+# Builtin kubernetes cluster-defaults preset. Bootstrap RBAC/core ids live in bootstrap-audit* groups;
+# rbac-cluster-roles / rbac-cluster-role-bindings CEL is synthesized from those ids at load time.
+id: kubernetes
+defaultEnabled: true
+activates:
+  # GA/default-on feature gates in upstream Kubernetes 1.34+.
+  - preset: kubernetes-dynamic-resource-allocation
+    kubernetesMinorMin: 34
+  - preset: kubernetes-volume-attributes-class
+    kubernetesMinorMin: 34
+predicates:
+  deployment:
+    cel:
+      - gvk: apps/v1/Deployment
+        namespace: kube-system
+        cel: 'name.matches("^cloud-controller-manager.*") || name.matches("^snapshot-controller-leader.*")'
+        optional: true
+  default-namespace-injected:
+    ids:
+      - 'v1/ServiceAccount/default/default'
+      - 'v1/ConfigMap/default/kube-root-ca.crt'
+  # Namespaces + default SAs in kube-node-lease/kube-public: common across Talos and managed stacks.
+  # Kubeadm/GKE-style tenant RBAC, bootstrap SAs, cluster-info, and cloud-config live under the syseleven preset.
+  k8s-foundation-tenant-starter:
+    ids:
+      - 'v1/Namespace//default'
+      - 'v1/Namespace//kube-node-lease'
+      - 'v1/Namespace//kube-public'
+      - 'v1/Namespace//kube-system'
+      - 'v1/ServiceAccount/kube-node-lease/default'
+      - 'v1/ServiceAccount/kube-public/default'
+  nodes:
+    cel:
+      - gvk: v1/Node
+  bootstrap-audit:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//cluster-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//edit'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:aggregate-to-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:aggregate-to-edit'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:aggregate-to-view'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:auth-delegator'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:basic-user'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:certificatesigningrequests:nodeclient'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:certificatesigningrequests:selfnodeclient'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:kube-apiserver-client-approver'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:kube-apiserver-client-kubelet-approver'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:kubelet-serving-approver'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:certificates.k8s.io:legacy-unknown-approver'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:attachdetach-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:certificate-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:clusterrole-aggregation-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:cronjob-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:daemon-set-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:deployment-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:disruption-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:endpoint-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:endpointslice-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:endpointslicemirroring-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:ephemeral-volume-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:expand-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:generic-garbage-collector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:horizontal-pod-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:job-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:legacy-service-account-token-cleaner'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:namespace-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:node-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:persistent-volume-binder'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:pod-garbage-collector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:pv-protection-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:pvc-protection-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:replicaset-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:replication-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:resourcequota-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:root-ca-cert-publisher'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:route-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:service-account-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:service-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:statefulset-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:ttl-after-finished-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:ttl-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:validatingadmissionpolicy-status-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:discovery'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:heapster'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kube-aggregator'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kube-dns'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubelet-api-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:monitoring'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:node-bootstrapper'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:node-problem-detector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:node-proxier'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:persistent-volume-provisioner'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:public-info-viewer'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:service-account-issuer-discovery'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:volume-scheduler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//view'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:basic-user'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:attachdetach-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:certificate-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:clusterrole-aggregation-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:cronjob-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:daemon-set-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:deployment-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:disruption-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:endpoint-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:endpointslice-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:endpointslicemirroring-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:ephemeral-volume-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:expand-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:generic-garbage-collector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:horizontal-pod-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:job-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:legacy-service-account-token-cleaner'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:namespace-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:node-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:persistent-volume-binder'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:pod-garbage-collector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:pv-protection-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:pvc-protection-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:replicaset-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:replication-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:resourcequota-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:root-ca-cert-publisher'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:route-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:service-account-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:service-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:statefulset-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:ttl-after-finished-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:ttl-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:validatingadmissionpolicy-status-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:discovery'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kube-dns'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:monitoring'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:node-proxier'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:public-info-viewer'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:service-account-issuer-discovery'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:volume-scheduler'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/system:controller:bootstrap-signer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/extension-apiserver-authentication-reader'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/system:controller:bootstrap-signer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/system:controller:cloud-provider'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/system:controller:token-cleaner'
+      - 'v1/ConfigMap/kube-node-lease/kube-root-ca.crt'
+      - 'v1/ConfigMap/kube-public/kube-root-ca.crt'
+      - 'v1/ConfigMap/kube-system/kube-root-ca.crt'
+      - 'v1/Service/default/kubernetes'
+
+  bootstrap-audit-m29:
+    kubernetesMinorMin: 29
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:service-cidrs-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:service-cidrs-controller'
+
+  # Selinux warning controller bootstrap RBAC: Kubernetes 1.33+ (not in 1.32).
+  bootstrap-audit-m33:
+    kubernetesMinorMin: 33
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:selinux-warning-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:selinux-warning-controller'
+
+  # DRA device-taint eviction controller (separate SA + bootstrap RBAC): Kubernetes 1.36+.
+  bootstrap-audit-m36:
+    kubernetesMinorMin: 36
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:controller:device-taint-eviction-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:controller:device-taint-eviction-controller'
+
+  apiserver-leases:
+    cel:
+      - gvk: coordination.k8s.io/v1/Lease
+        namespace: kube-system
+        cel: 'name.matches("^apiserver-.+")'
+  kube-root-ca-configmap:
+    cel:
+      - gvk: v1/ConfigMap
+        name: kube-root-ca.crt
+        cel: 'ns != "cloud-init-settings"'
+  rbac-rolebindings:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-public/system:controller:bootstrap-signer'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system::extension-apiserver-authentication-reader'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:controller:bootstrap-signer'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:controller:cloud-provider'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:controller:token-cleaner'
+  # Flowcontrol, service discovery, networking, scheduling, and core API extension machinery not owned by
+  # Canal/Kubermatic/CSI/Quobyte. Keep APIService/CRD CELs disjoint from those presets (1:1 assignment in tests).
+  control-plane-aggregation:
+    cel:
+      - gvk: flowcontrol.apiserver.k8s.io/v1/FlowSchema
+      - gvk: flowcontrol.apiserver.k8s.io/v1/PriorityLevelConfiguration
+      - gvk: discovery.k8s.io/v1/EndpointSlice
+        namespace: default
+        name: kubernetes
+      - gvk: networking.k8s.io/v1/IPAddress
+      - gvk: networking.k8s.io/v1/ServiceCIDR
+      - gvk: scheduling.k8s.io/v1/PriorityClass
+  # Built-in/default APIServices owned by the cluster control plane. Distribution or addon APIServices must be
+  # listed in their own presets so matching stays explicit and 1:1 in golden tests.
+  apiregistration-cluster-services:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1.'
+      - 'apiregistration.k8s.io/v1/APIService//v1.admissionregistration.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.apiextensions.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.apps'
+      - 'apiregistration.k8s.io/v1/APIService//v1.authentication.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.authorization.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.autoscaling'
+      - 'apiregistration.k8s.io/v1/APIService//v1.batch'
+      - 'apiregistration.k8s.io/v1/APIService//v1.certificates.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.coordination.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.discovery.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.events.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.flowcontrol.apiserver.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.networking.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.node.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.policy'
+      - 'apiregistration.k8s.io/v1/APIService//v1.rbac.authorization.k8s.io'
+      - id: 'apiregistration.k8s.io/v1/APIService//v1.resource.k8s.io'
+        optional: true
+      - 'apiregistration.k8s.io/v1/APIService//v1.scheduling.k8s.io'
+      - 'apiregistration.k8s.io/v1/APIService//v1.storage.k8s.io'
+      - id: 'apiregistration.k8s.io/v1/APIService//v1alpha1.policy.networking.k8s.io'
+        optional: true
+      - 'apiregistration.k8s.io/v1/APIService//v2.autoscaling'
+  configmaps-infra:
+    ids:
+      - 'v1/ConfigMap/kube-system/extension-apiserver-authentication'
+      - 'v1/ConfigMap/kube-system/kube-apiserver-legacy-service-account-token-tracking'
+  kube-system-serviceaccounts:
+    ids:
+      - 'v1/ServiceAccount/kube-system/attachdetach-controller'
+      - 'v1/ServiceAccount/kube-system/certificate-controller'
+      - 'v1/ServiceAccount/kube-system/clusterrole-aggregation-controller'
+      - 'v1/ServiceAccount/kube-system/cronjob-controller'
+      - 'v1/ServiceAccount/kube-system/daemon-set-controller'
+      - 'v1/ServiceAccount/kube-system/default'
+      - 'v1/ServiceAccount/kube-system/deployment-controller'
+      - 'v1/ServiceAccount/kube-system/disruption-controller'
+      - 'v1/ServiceAccount/kube-system/endpoint-controller'
+      - 'v1/ServiceAccount/kube-system/endpointslice-controller'
+      - 'v1/ServiceAccount/kube-system/endpointslicemirroring-controller'
+      - 'v1/ServiceAccount/kube-system/ephemeral-volume-controller'
+      - 'v1/ServiceAccount/kube-system/expand-controller'
+      - 'v1/ServiceAccount/kube-system/generic-garbage-collector'
+      - 'v1/ServiceAccount/kube-system/horizontal-pod-autoscaler'
+      - 'v1/ServiceAccount/kube-system/job-controller'
+      - 'v1/ServiceAccount/kube-system/legacy-service-account-token-cleaner'
+      - 'v1/ServiceAccount/kube-system/namespace-controller'
+      - 'v1/ServiceAccount/kube-system/node-controller'
+      - 'v1/ServiceAccount/kube-system/persistent-volume-binder'
+      - 'v1/ServiceAccount/kube-system/pod-garbage-collector'
+      - 'v1/ServiceAccount/kube-system/pv-protection-controller'
+      - 'v1/ServiceAccount/kube-system/pvc-protection-controller'
+      - 'v1/ServiceAccount/kube-system/replicaset-controller'
+      - 'v1/ServiceAccount/kube-system/replication-controller'
+      - 'v1/ServiceAccount/kube-system/resourcequota-controller'
+      - 'v1/ServiceAccount/kube-system/root-ca-cert-publisher'
+      - id: 'v1/ServiceAccount/kube-system/bootstrap-signer'
+        optional: true
+      - 'v1/ServiceAccount/kube-system/service-account-controller'
+      - id: 'v1/ServiceAccount/kube-system/service-controller'
+        optional: true
+      - 'v1/ServiceAccount/kube-system/service-cidrs-controller'
+      - 'v1/ServiceAccount/kube-system/statefulset-controller'
+      - 'v1/ServiceAccount/kube-system/token-cleaner'
+      - 'v1/ServiceAccount/kube-system/ttl-after-finished-controller'
+      - 'v1/ServiceAccount/kube-system/ttl-controller'
+      - 'v1/ServiceAccount/kube-system/validatingadmissionpolicy-status-controller'

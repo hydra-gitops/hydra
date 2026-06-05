@@ -1,0 +1,95 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices"
+  ],
+  "dependencyDashboard": true,
+  "labels": [
+    "dependencies"
+  ],
+  "branchConcurrentLimit": 5,
+  "prConcurrentLimit": 5,
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions",
+    "gomod",
+    "npm",
+    "pip_requirements",
+    "custom.regex"
+  ],
+  "ignorePaths": [
+    "docs/site/.venv/**",
+    "docs/site/site/**",
+    "docs/site/hydra_mkdocs.egg-info/**"
+  ],
+  "schedule": [
+    "after 3am and before 5am every day"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "custom.regex",
+        "github-actions"
+      ],
+      "groupName": "ci tooling"
+    },
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "groupName": "go dependencies"
+    },
+    {
+      "matchManagers": [
+        "npm"
+      ],
+      "matchFileNames": [
+        "hydra-ui/package.json"
+      ],
+      "groupName": "ui dependencies"
+    },
+    {
+      "matchManagers": [
+        "pip_requirements"
+      ],
+      "matchFileNames": [
+        "docs/site/requirements.txt"
+      ],
+      "groupName": "docs python dependencies"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github\\/workflows\\/.*\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "ghcr\\.io/catthehacker/ubuntu:(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)",
+        "image:\\s+(?<depName>renovate/renovate):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker",
+      "depNameTemplate": "{{#if depName}}{{{depName}}}{{else}}ghcr.io/catthehacker/ubuntu{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^scripts\\/.*\\.sh$/"
+      ],
+      "matchStrings": [
+        "npx -y (?<depName>semantic-release|renovate)@(?<currentValue>[^\\s\"']+)"
+      ],
+      "datasourceTemplate": "npm"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github\\/actions\\/install-(cosign|goreleaser|sops)\\/action\\.ya?ml$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[^\\s]+) depName=(?<depName>[^\\s]+)\\s+(?:cosign-release:\\s*v|version=\")(?<currentValue>\\d+\\.\\d+\\.\\d+)\"?"
+      ]
+    }
+  ]
+}

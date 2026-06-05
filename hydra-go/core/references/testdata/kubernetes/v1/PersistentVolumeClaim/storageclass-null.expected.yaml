@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: v1/PersistentVolumeClaim/default/my-pvc-null-sc
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/my-pvc-null-sc
+    - owner: v1/PersistentVolumeClaim/default/my-pvc-null-sc
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolumeClaim/default/my-pvc-null-sc
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

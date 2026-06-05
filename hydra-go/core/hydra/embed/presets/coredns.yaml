@@ -1,0 +1,47 @@
+id: coredns
+defaultEnabled: true
+predicates:
+  deployment:
+    ids:
+      - 'apps/v1/Deployment/kube-system/coredns'
+  kube-dns-service:
+    ids:
+      - 'v1/Service/kube-system/kube-dns'
+  configmap:
+    ids:
+      - 'v1/ConfigMap/kube-system/coredns'
+      - id: 'v1/ConfigMap/kube-system/coredns-custom'
+        optional: true
+  serviceaccount:
+    ids:
+      - 'v1/ServiceAccount/kube-system/coredns'
+  cluster-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:coredns'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:coredns'
+  horizontal-pod-autoscaler:
+    cel:
+      - gvk: autoscaling/v2/HorizontalPodAutoscaler
+        namespace: kube-system
+        name: coredns
+        optional: true
+      - gvk: autoscaling/v2beta2/HorizontalPodAutoscaler
+        namespace: kube-system
+        name: coredns
+        optional: true
+  pod-disruption-budget:
+    cel:
+      - gvk: policy/v1/PodDisruptionBudget
+        namespace: kube-system
+        name: coredns
+        optional: true
+      - gvk: policy/v1beta1/PodDisruptionBudget
+        namespace: kube-system
+        name: coredns
+        optional: true
+  pod-metrics:
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^coredns-.*")'
+        optional: true

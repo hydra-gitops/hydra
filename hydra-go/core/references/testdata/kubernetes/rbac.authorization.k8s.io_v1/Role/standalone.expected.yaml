@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+    - owner: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/Role/default/pod-reader
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

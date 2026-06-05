@@ -1,0 +1,23 @@
+refDefinitions:
+    - owner: v1/PersistentVolume//my-pv
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/PersistentVolume//my-pv
+    - owner: v1/PersistentVolume//my-pv
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: storage.k8s.io/v1/StorageClass//fast-sc
+      label: storageClass
+refs:
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolume//my-pv
+      to: storage.k8s.io/v1/StorageClass//fast-sc
+      labels:
+        - storageClass
+      attributes:
+        - origin:source: test

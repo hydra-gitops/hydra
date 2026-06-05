@@ -1,0 +1,75 @@
+refDefinitions:
+    - owner: v1/ConfigMap/ingress-nginx/managed-cm
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ConfigMap/ingress-nginx/managed-cm
+    - owner: v1/ConfigMap/ingress-nginx/managed-cm
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//ingress-nginx
+      label: namespace
+    - owner: v1/ConfigMap/ingress-nginx/managed-cm
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Service/ingress-nginx/ingress-nginx-controller
+      label: objectset-owner
+      attributes:
+        - hydra:parent-direction: outgoing
+        - hydra:parent-via: objectset-owner
+        - origin:objectset: rio.cattle.io
+      reverse: true
+    - owner: v1/Service/ingress-nginx/ingress-nginx-controller
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/Service/ingress-nginx/ingress-nginx-controller
+    - owner: v1/Service/ingress-nginx/ingress-nginx-controller
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//ingress-nginx
+      label: namespace
+    - owner: v1/Service/ingress-nginx/ingress-nginx-controller
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: service
+        value: ingress-nginx/ingress-nginx-controller
+      label: service
+refs:
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/ingress-nginx/managed-cm
+      to: v1/Namespace//ingress-nginx
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/ingress-nginx/managed-cm
+      to: v1/Service/ingress-nginx/ingress-nginx-controller
+      labels:
+        - objectset-owner
+      attributes:
+        - hydra:parent-direction: outgoing
+        - hydra:parent-via: objectset-owner
+        - origin:objectset: rio.cattle.io
+        - origin:source: test
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: v1/Service/ingress-nginx/ingress-nginx-controller
+      to: v1/Namespace//ingress-nginx
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

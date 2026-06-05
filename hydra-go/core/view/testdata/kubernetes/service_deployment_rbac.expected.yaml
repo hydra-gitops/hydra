@@ -1,0 +1,90 @@
+entities:
+    - id: apps/v1/Deployment/default/demo
+      templatePath: unknown-5.yaml
+      templateIndex: 1
+    - id: rbac.authorization.k8s.io/v1/Role/default/demo-role
+      templatePath: unknown-2.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - ""
+          resources:
+            - pods
+          verbs:
+            - get
+            - list
+    - id: rbac.authorization.k8s.io/v1/RoleBinding/default/demo-rb
+      templatePath: unknown-3.yaml
+      templateIndex: 1
+    - id: v1/Namespace//default
+      tags:
+        - app:missing
+    - id: v1/Service/default/demo-svc
+      templatePath: unknown-4.yaml
+      templateIndex: 1
+    - id: v1/ServiceAccount/default/demo-sa
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+groups:
+    - name: demo (Deployment)
+      ids:
+        - apps/v1/Deployment/default/demo
+        - rbac.authorization.k8s.io/v1/Role/default/demo-role
+        - rbac.authorization.k8s.io/v1/RoleBinding/default/demo-rb
+        - v1/ServiceAccount/default/demo-sa
+references:
+    - from: apps/v1/Deployment/default/demo
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/default/demo
+      to: v1/ServiceAccount/default/demo-sa
+      labels:
+        - serviceAccount
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/Role/default/demo-role
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/demo-rb
+      to: rbac.authorization.k8s.io/v1/Role/default/demo-role
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/demo-rb
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/demo-rb
+      to: v1/ServiceAccount/default/demo-sa
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: v1/Service/default/demo-svc
+      to: apps/v1/Deployment/default/demo
+      labels:
+        - service
+      attributes:
+        - origin:source: template
+    - from: v1/Service/default/demo-svc
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ServiceAccount/default/demo-sa
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template

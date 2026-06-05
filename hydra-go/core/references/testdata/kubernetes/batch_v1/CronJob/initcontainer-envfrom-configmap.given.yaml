@@ -1,0 +1,33 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: my-cronjob
+  namespace: default
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: my-app
+        spec:
+          initContainers:
+            - name: init
+              image: busybox
+              envFrom:
+                - configMapRef:
+                    name: init-config
+          containers:
+            - name: app
+              image: busybox
+              command: ["echo", "hello"]
+          restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-config
+  namespace: default
+data:
+  KEY: value

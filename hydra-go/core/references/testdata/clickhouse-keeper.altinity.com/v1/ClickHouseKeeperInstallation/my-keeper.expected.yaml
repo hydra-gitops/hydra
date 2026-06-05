@@ -1,0 +1,62 @@
+refDefinitions:
+    - owner: apps/v1/Deployment/demo-infra/operator-clickhouse
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/demo-infra/operator-clickhouse
+    - owner: apps/v1/Deployment/demo-infra/operator-clickhouse
+      type: direct
+      direction: incoming
+      endpoint:
+        type: provider
+        value: clickhouse-operator
+    - owner: apps/v1/Deployment/demo-infra/operator-clickhouse
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//demo-infra
+      label: namespace
+    - owner: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+    - owner: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//demo-infra
+      label: namespace
+    - owner: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: provider
+        value: clickhouse-operator
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/demo-infra/operator-clickhouse
+      to: v1/Namespace//demo-infra
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: provider
+      from: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+      to: apps/v1/Deployment/demo-infra/operator-clickhouse
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: clickhouse-keeper.altinity.com/v1/ClickHouseKeeperInstallation/demo-infra/my-keeper
+      to: v1/Namespace//demo-infra
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

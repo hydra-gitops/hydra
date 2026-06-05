@@ -1,0 +1,10 @@
+# autoSteps overrides default order (subset)
+ci:
+  rootAppsPath: "apps"
+  environments:
+    - dev
+    - stage
+    - prod
+  autoSteps:
+    - release
+    - promote

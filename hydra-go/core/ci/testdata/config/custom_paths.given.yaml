@@ -1,0 +1,6 @@
+# Non-standard root apps path for custom repository layouts
+ci:
+  rootAppsPath: "custom/apps"
+  environments:
+    - dev
+    - prod

@@ -1,0 +1,3 @@
+# Missing environments should produce an error
+ci:
+  rootAppsPath: "apps"

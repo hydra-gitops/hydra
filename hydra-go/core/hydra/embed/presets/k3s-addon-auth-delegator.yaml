@@ -1,0 +1,9 @@
+# Builtin: k3s.cattle.io Addon kube-system/auth-delegator — activates metrics-server.
+id: k3s-addon-auth-delegator
+defaultEnabled: false
+activates:
+  - metrics-server
+predicates:
+  addon:
+    ids:
+      - 'k3s.cattle.io/v1/Addon/kube-system/auth-delegator'

@@ -1,0 +1,88 @@
+# Two Jobs with DIFFERENT ServiceAccount references should NOT be merged.
+# Each Job uses its own SA, so they stay as separate groups.
+# Contrast with jobs_same_dependencies where both Jobs share the same SA.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: create-sa
+  namespace: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: patch-sa
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: create-role
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: create-rb
+  namespace: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: create-sa
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: create-role
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: patch-role
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: patch-rb
+  namespace: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: patch-sa
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: patch-role
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admission-create
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      serviceAccountName: create-sa
+      containers:
+        - name: create
+          image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admission-patch
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      serviceAccountName: patch-sa
+      containers:
+        - name: patch
+          image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1

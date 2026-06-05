@@ -1,0 +1,20 @@
+# Builtin cluster-defaults preset: SysEleven node-problem-detector (RBAC + kube-system workload).
+id: syseleven-node-problem-detector
+defaultEnabled: false
+predicates:
+  daemonset:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/syseleven-node-problem-detector'
+  rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//syseleven:node-problem-detector'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//syseleven:node-problem-detector'
+  workloads:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/syseleven-node-problem-detector'
+      - 'v1/ConfigMap/kube-system/syseleven-node-problem-detector-config'
+      - 'v1/ServiceAccount/kube-system/syseleven-node-problem-detector'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^syseleven-node-problem-detector-.*")'

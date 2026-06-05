@@ -1,0 +1,105 @@
+version: 2
+
+project_name: hydra
+dist: ../dist
+
+builds:
+  - id: hydra
+    dir: cli
+    main: .
+    binary: hydra
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X hydra-gitops.org/hydra/hydra-go/base/buildinfo.Version={{.Version}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    goamd64:
+      - v2
+
+gomod:
+  dir: cli
+
+archives:
+  - id: hydra
+    ids: [hydra]
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+signs:
+  - id: hydra-archives-signature
+    artifacts: archive
+    signature: "${artifact}.sigstore.json"
+    cmd: cosign
+    args:
+      - sign-blob
+      - --yes
+      - --key
+      - "{{ .Env.COSIGN_PRIVATE_KEY_PATH }}"
+      - "--bundle=${signature}"
+      - "${artifact}"
+  - id: hydra-checksums-signature
+    artifacts: checksum
+    signature: "${artifact}.sigstore.json"
+    cmd: cosign
+    args:
+      - sign-blob
+      - --yes
+      - --key
+      - "{{ .Env.COSIGN_PRIVATE_KEY_PATH }}"
+      - "--bundle=${signature}"
+      - "${artifact}"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^tmp-"
+      - "^Merge"
+
+homebrew_casks:
+  - name: hydra
+    ids: [hydra]
+    binaries:
+      - hydra
+    repository:
+      branch: main
+      git:
+        url: "ssh://git@github.com/hydra-gitops/homebrew-tap.git"
+        private_key: "{{ .Env.HOMEBREW_TAP_DEPLOY_KEY }}"
+    directory: Casks
+    homepage: "https://hydra-gitops.org/"
+    description: "Hydra GitOps CLI for Kubernetes cluster management"
+
+release:
+  github:
+    owner: hydra-gitops
+    name: hydra
+  footer: |
+    ## Install
+
+    Docker (multi-arch `linux/amd64` + `linux/arm64`):
+
+    ```bash
+    docker pull ghcr.io/hydra-gitops/hydra:{{ .Tag }}
+    ```
+
+    Homebrew (macOS + Linux):
+
+    ```bash
+    brew install --cask hydra-gitops/tap/hydra
+    ```
+
+    Verify downloaded archives with the published checksum file:
+
+    ```bash
+    curl -LO https://github.com/hydra-gitops/hydra/releases/download/{{ .Tag }}/checksums.txt
+    shasum -a 256 --check checksums.txt
+    ```

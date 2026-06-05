@@ -1,0 +1,18 @@
+# Builtin cluster-defaults preset: Cloud POC Gardener shoot bundle.
+id: cloud-poc
+defaultEnabled: false
+activates:
+  - gardener
+  - calico
+  - cinder
+  - metrics-server
+predicates:
+  cloud-controller:
+    ids:
+      - 'coordination.k8s.io/v1/Lease/kube-system/cloud-poc-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//extensions.gardener.cloud:provider-openstack:cloud-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//extensions.gardener.cloud:provider-cloud-poc:cloud-controller-manager'
+  storage-classes:
+    cel:
+      - gvk: storage.k8s.io/v1/StorageClass
+        cel: 'name.matches("^premium-perf\\d+-cloud-poc$")'

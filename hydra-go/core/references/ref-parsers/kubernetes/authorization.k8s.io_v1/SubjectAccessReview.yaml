@@ -1,0 +1,6 @@
+ref-parsers:
+  # SubjectAccessReview -> ServiceAccount (when checking a ServiceAccount)
+  - gvk: authorization.k8s.io/v1/SubjectAccessReview
+    pick:
+      - cel: "has(entity.spec.user) && entity.spec.user.startsWith('system:serviceaccount:') ? [refBuilder().outgoing(id('v1/ServiceAccount', entity.spec.user.split(':')[2], entity.spec.user.split(':')[3]))] : []"
+        label: serviceAccount

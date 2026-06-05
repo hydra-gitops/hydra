@@ -1,0 +1,36 @@
+ref-parsers:
+  - gvk: events.k8s.io/v1/Event
+    pick:
+      - cel: |
+          has(entity.related) && has(entity.related.kind) && has(entity.related.name) ?
+          [refBuilder()
+            .outgoing(id(
+              (has(entity.related.apiVersion) && entity.related.apiVersion != '' ? entity.related.apiVersion : 'v1') + '/' + entity.related.kind,
+              has(entity.related.namespace) && entity.related.namespace != '' ? entity.related.namespace : '',
+              entity.related.name
+            ))
+            .attribute('related', idString(
+              (has(entity.related.apiVersion) && entity.related.apiVersion != '' ? entity.related.apiVersion : 'v1') + '/' + entity.related.kind,
+              has(entity.related.namespace) && entity.related.namespace != '' ? entity.related.namespace : '',
+              entity.related.name
+            ))
+            .label('related')
+          ] : []
+        label: related
+      - cel: |
+          has(entity.regarding) && has(entity.regarding.kind) && has(entity.regarding.name) ?
+          [refBuilder()
+            .outgoing(id(
+              (has(entity.regarding.apiVersion) && entity.regarding.apiVersion != '' ? entity.regarding.apiVersion : 'v1') + '/' + entity.regarding.kind,
+              has(entity.regarding.namespace) && entity.regarding.namespace != '' ? entity.regarding.namespace : '',
+              entity.regarding.name
+            ))
+            .refType('regarding')
+            .attribute('regarding', idString(
+              (has(entity.regarding.apiVersion) && entity.regarding.apiVersion != '' ? entity.regarding.apiVersion : 'v1') + '/' + entity.regarding.kind,
+              has(entity.regarding.namespace) && entity.regarding.namespace != '' ? entity.regarding.namespace : '',
+              entity.regarding.name
+            ))
+            .label('regarding')
+          ] : []
+        label: regarding

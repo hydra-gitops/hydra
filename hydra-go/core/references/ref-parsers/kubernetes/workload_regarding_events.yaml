@@ -1,0 +1,86 @@
+# Merged inspect / uninstall: edges from a namespaced workload to live Event objects in the same
+# namespace whose metadata.name starts with "<workload metadata.name>-" or "<workload metadata.name>."
+# (typical core v1 / client-go Event names) and whose regarding (events.k8s.io) or involvedObject
+# (core v1) subject matches this workload. Propagation assigns the workload's app to matching Event
+# objects (e.g. kube-system).
+ref-parsers:
+  - gvk: apps/v1/Deployment
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Deployment' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Deployment' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '-[a-z0-9]+-[a-z0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '-[a-z0-9]+-[a-z0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: apps/v1/StatefulSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'StatefulSet' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'StatefulSet' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '-[0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '-[0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: apps/v1/DaemonSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'DaemonSet' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'DaemonSet' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '-[a-z0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '-[a-z0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: apps/v1/ReplicaSet
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'ReplicaSet' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'ReplicaSet' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '-[a-z0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '-[a-z0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: batch/v1/Job
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Job' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Job' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '(-[0-9]+)?-[a-z0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '(-[0-9]+)?-[a-z0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: batch/v1/CronJob
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'CronJob' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'CronJob' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name.matches('^' + string(name) + '-[0-9]+-[a-z0-9]+$') && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name.matches('^' + string(name) + '-[0-9]+-[a-z0-9]+$') && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+  - gvk: v1/Pod
+    tag:
+      - uninstall-safe
+    pick:
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "events.k8s.io/v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.regarding) && e.entity.regarding.kind == 'Pod' && e.entity.regarding.name == name && (!has(e.entity.regarding.namespace) || e.entity.regarding.namespace == '' || e.entity.regarding.namespace == ns)).map(e, refBuilder().outgoing(id('events.k8s.io/v1/Event', ns, e.name)).label('workloadRegardingEvent'))
+      - cel: |-
+          clusterEntities({"namespace": ns, "gvk": "v1/Event"}).filter(e, (e.name.startsWith(string(name) + '-') || e.name.startsWith(string(name) + '.')) && has(e.entity.involvedObject) && e.entity.involvedObject.kind == 'Pod' && e.entity.involvedObject.name == name && (!has(e.entity.involvedObject.namespace) || e.entity.involvedObject.namespace == '' || e.entity.involvedObject.namespace == ns)).map(e, refBuilder().outgoing(id('v1/Event', ns, e.name)).label('workloadRegardingEvent'))

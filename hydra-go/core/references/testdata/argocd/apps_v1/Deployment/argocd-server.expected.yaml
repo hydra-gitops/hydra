@@ -1,0 +1,95 @@
+refDefinitions:
+    - owner: apps/v1/Deployment/argocd/argocd-server
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/argocd/argocd-server
+    - owner: apps/v1/Deployment/argocd/argocd-server
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ConfigMap/argocd/argocd-rbac-cm
+      label: runtime
+    - owner: apps/v1/Deployment/argocd/argocd-server
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//argocd
+      label: namespace
+    - owner: apps/v1/Deployment/argocd/argocd-server
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Secret/argocd/argocd-secret
+      label: runtime
+    - owner: v1/ConfigMap/argocd/argocd-rbac-cm
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ConfigMap/argocd/argocd-rbac-cm
+    - owner: v1/ConfigMap/argocd/argocd-rbac-cm
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//argocd
+      label: namespace
+    - owner: v1/Secret/argocd/argocd-secret
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/Secret/argocd/argocd-secret
+    - owner: v1/Secret/argocd/argocd-secret
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//argocd
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/argocd/argocd-server
+      to: v1/ConfigMap/argocd/argocd-rbac-cm
+      labels:
+        - runtime
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/argocd/argocd-server
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/argocd/argocd-server
+      to: v1/Secret/argocd/argocd-secret
+      labels:
+        - runtime
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/ConfigMap/argocd/argocd-rbac-cm
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/Secret/argocd/argocd-secret
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

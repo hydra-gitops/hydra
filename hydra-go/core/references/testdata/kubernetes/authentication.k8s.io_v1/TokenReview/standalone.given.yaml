@@ -1,0 +1,6 @@
+apiVersion: authentication.k8s.io/v1
+kind: TokenReview
+metadata:
+  name: validate-token
+spec:
+  token: "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9..."

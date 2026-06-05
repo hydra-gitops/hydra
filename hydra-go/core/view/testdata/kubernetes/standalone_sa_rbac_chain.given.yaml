@@ -1,0 +1,68 @@
+# Standalone ServiceAccount (no workload references it) should act as a group seed.
+# The SA has only reverse incoming edges (from RoleBinding/ClusterRoleBinding subjects)
+# and outgoing edges (to Secrets via imagePullSecret). It should absorb its RBAC chain.
+#
+# Expected: SA "admission" creates its own group containing:
+#   SA, Role, RoleBinding, ClusterRole, ClusterRoleBinding, Secret
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admission
+  namespace: monitoring
+imagePullSecrets:
+  - name: image-pull-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: image-pull-secret
+  namespace: monitoring
+type: kubernetes.io/dockerconfigjson
+data:
+  .dockerconfigjson: e30=
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: admission
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admission
+  namespace: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: admission
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: admission
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: admission
+rules:
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations"]
+    verbs: ["get", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admission
+subjects:
+  - kind: ServiceAccount
+    name: admission
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admission

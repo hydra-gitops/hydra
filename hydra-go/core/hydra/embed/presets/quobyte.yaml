@@ -1,0 +1,8 @@
+# Builtin cluster-defaults preset: Sys11 Quobyte external provisioner (StorageClass + VolumeSnapshotClass).
+id: quobyte
+defaultEnabled: false
+predicates:
+  sys11-quobyte-storage:
+    ids:
+      - 'storage.k8s.io/v1/StorageClass//sys11-quobyte-external-provisioner'
+      - 'snapshot.storage.k8s.io/v1/VolumeSnapshotClass//sys11-quobyte-external-snapshotter'

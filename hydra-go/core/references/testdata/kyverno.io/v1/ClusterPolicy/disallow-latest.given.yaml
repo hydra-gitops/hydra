@@ -1,0 +1,57 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: disallow-latest
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Using 'latest' image tag is not allowed."
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kyverno
+  name: kyverno-admission-controller
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kyverno-admission-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kyverno-admission-controller
+    spec:
+      containers:
+        - name: kyverno
+          image: ghcr.io/kyverno/kyverno:v1.11.0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: kyverno
+  name: kyverno-background-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: kyverno-background-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kyverno-background-controller
+    spec:
+      containers:
+        - name: kyverno
+          image: ghcr.io/kyverno/background-controller:v1.11.0

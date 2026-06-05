@@ -1,0 +1,22 @@
+branches:
+  - main
+
+plugins:
+  - - "@semantic-release/commit-analyzer"
+    - preset: conventionalcommits
+  - - "@semantic-release/release-notes-generator"
+    - preset: conventionalcommits
+  - - "@semantic-release/changelog"
+    - changelogFile: CHANGELOG.md
+  - - "@semantic-release/exec"
+    - prepareCmd: ./scripts/generate-readme.sh ${nextRelease.version}
+      publishCmd: ./scripts/sign-release-tag.sh ${nextRelease.gitTag} ${nextRelease.gitHead}
+  - - "@semantic-release/git"
+    - assets:
+        - CHANGELOG.md
+        - README.md
+      message: |
+        chore(release): ${nextRelease.version} [skip ci]
+
+        ${nextRelease.notes}
+  - "@semantic-release/github"

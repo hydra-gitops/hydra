@@ -1,0 +1,19 @@
+entities:
+    - id: v1/ConfigMap/default/demo-config
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+    - id: v1/Namespace//default
+      tags:
+        - app:missing
+groups:
+    - name: default (Namespace)
+      ids:
+        - v1/ConfigMap/default/demo-config
+        - v1/Namespace//default
+references:
+    - from: v1/ConfigMap/default/demo-config
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template

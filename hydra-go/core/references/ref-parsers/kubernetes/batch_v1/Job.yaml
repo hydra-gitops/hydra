@@ -1,0 +1,55 @@
+ref-parsers:
+  - gvk: batch/v1/Job
+    pick:
+      # Job -> Secret (argocd admin redis-initial-password creates/populates argocd-redis)
+      - cel: "(has(entity.spec.template.spec.containers) && entity.spec.template.spec.containers.exists(c, has(c.command) && c.command.exists(part, part == \"redis-initial-password\"))) || (has(entity.spec.template.spec.initContainers) && entity.spec.template.spec.initContainers.exists(c, has(c.command) && c.command.exists(part, part == \"redis-initial-password\"))) ? [refBuilder().outgoing(id('v1/Secret', ns, 'argocd-redis'))] : []"
+        label: source
+        attributes:
+          - "origin:generated": job
+      # Job -> Secret (imagePullSecrets)
+      - cel: "entity.spec.template.spec.imagePullSecrets.map(ips, refBuilder().outgoing(id('v1/Secret', ns, ips.name)))"
+        label: imagePullSecret
+      # Job -> ServiceAccount
+      - cel: "[refBuilder().outgoing(id('v1/ServiceAccount', ns, entity.spec.template.spec.serviceAccountName))]"
+        label: serviceAccount
+      # Job -> ConfigMap (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.configMap)).map(v, (has(v.configMap.optional) && v.configMap.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, v.configMap.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, v.configMap.name))))"
+        label: volume
+      # Job -> Secret (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.secret)).map(v, (has(v.secret.optional) && v.secret.optional ? refBuilder().outgoing(id('v1/Secret', ns, v.secret.secretName)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, v.secret.secretName))))"
+        label: volume
+      # Job -> PersistentVolumeClaim (volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.persistentVolumeClaim)).map(v, refBuilder().outgoing(id('v1/PersistentVolumeClaim', ns, v.persistentVolumeClaim.claimName)))"
+        label: volume
+      # Job -> ConfigMap (envFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.configMapRef)).map(e, (has(e.configMapRef.optional) && e.configMapRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)))) : []).flatten()"
+        label: envFrom
+      # Job -> Secret (envFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.secretRef)).map(e, (has(e.secretRef.optional) && e.secretRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)))) : []).flatten()"
+        label: envFrom
+      # Job -> ConfigMap (env valueFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.configMapKeyRef)).map(e, (has(e.valueFrom.configMapKeyRef.optional) && e.valueFrom.configMapKeyRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)))) : []).flatten()"
+        label: env
+      # Job -> Secret (env valueFrom)
+      - cel: "entity.spec.template.spec.containers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.secretKeyRef)).map(e, (has(e.valueFrom.secretKeyRef.optional) && e.valueFrom.secretKeyRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)))) : []).flatten()"
+        label: env
+      # Job -> ConfigMap (projected volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.projected)).map(v, v.projected.sources.filter(s, has(s.configMap)).map(s, (has(s.configMap.optional) && s.configMap.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, s.configMap.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, s.configMap.name))))).flatten()"
+        label: volume
+      # Job -> Secret (projected volumes)
+      - cel: "entity.spec.template.spec.volumes.filter(v, has(v.projected)).map(v, v.projected.sources.filter(s, has(s.secret)).map(s, (has(s.secret.optional) && s.secret.optional ? refBuilder().outgoing(id('v1/Secret', ns, s.secret.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, s.secret.name))))).flatten()"
+        label: volume
+      # Job -> ConfigMap (initContainers envFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.configMapRef)).map(e, (has(e.configMapRef.optional) && e.configMapRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.configMapRef.name)))) : []).flatten()"
+        label: "initContainer envFrom"
+      # Job -> Secret (initContainers envFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.envFrom) ? c.envFrom.filter(e, has(e.secretRef)).map(e, (has(e.secretRef.optional) && e.secretRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.secretRef.name)))) : []).flatten()"
+        label: "initContainer envFrom"
+      # Job -> ConfigMap (initContainers env valueFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.configMapKeyRef)).map(e, (has(e.valueFrom.configMapKeyRef.optional) && e.valueFrom.configMapKeyRef.optional ? refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/ConfigMap', ns, e.valueFrom.configMapKeyRef.name)))) : []).flatten()"
+        label: "initContainer env"
+      # Job -> Secret (initContainers env valueFrom)
+      - cel: "entity.spec.template.spec.initContainers.map(c, has(c.env) ? c.env.filter(e, has(e.valueFrom) && has(e.valueFrom.secretKeyRef)).map(e, (has(e.valueFrom.secretKeyRef.optional) && e.valueFrom.secretKeyRef.optional ? refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)).tag('optional:ref') : refBuilder().outgoing(id('v1/Secret', ns, e.valueFrom.secretKeyRef.name)))) : []).flatten()"
+        label: "initContainer env"
+      # Job -> Service (label selector matching via pod template labels)
+      - cel: "matchingServices(ns, entity.spec.template.metadata.labels).map(s, refBuilder().incoming(ref('service', s)))"

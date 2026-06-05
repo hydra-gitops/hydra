@@ -1,0 +1,5 @@
+# Builtin cluster-defaults preset: k3d dev clusters (K3s in Docker). Enables the k3s preset chain.
+id: k3d
+defaultEnabled: false
+activates:
+  - k3s

@@ -1,0 +1,39 @@
+# Mix of explicit null and named StorageClass: only the named class should produce an outgoing ref.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset-mixed-sc
+  namespace: default
+spec:
+  serviceName: my-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: app
+          image: nginx
+  volumeClaimTemplates:
+    - metadata:
+        name: data-default
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: null
+    - metadata:
+        name: data-fast
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: fast-sc

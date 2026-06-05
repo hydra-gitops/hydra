@@ -1,0 +1,9 @@
+apiVersion: authentication.k8s.io/v1
+kind: TokenRequest
+metadata:
+  name: my-token-request
+  namespace: default
+spec:
+  audiences:
+    - "https://kubernetes.default.svc"
+  expirationSeconds: 3600

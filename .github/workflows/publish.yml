@@ -1,0 +1,55 @@
+name: publish
+run-name: publish ${{ github.event.client_payload.tag }}
+
+on:
+  repository_dispatch:
+    types:
+      - hydra_publish
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Print github.actor
+        run: echo "github.actor=${{ github.actor }}"
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: refs/tags/${{ github.event.client_payload.tag }}
+
+      - name: Install cosign
+        uses: ./.github/actions/install-cosign
+
+      - name: Install sops
+        uses: ./.github/actions/install-sops
+
+      - name: Install goreleaser
+        uses: ./.github/actions/install-goreleaser
+
+      - name: Verify release
+        env:
+          RELEASE_TAG: ${{ github.event.client_payload.tag }}
+          SOPS_AGE_KEY_PUBLISH: ${{ secrets.SOPS_AGE_KEY_PUBLISH }}
+        run: ./scripts/publish.sh verify
+
+      - name: Build and publish CLI
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.client_payload.tag }}
+          SOPS_AGE_KEY_PUBLISH: ${{ secrets.SOPS_AGE_KEY_PUBLISH }}
+        run: ./scripts/publish.sh cli
+
+      - name: Build and publish container
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.client_payload.tag }}
+          SOPS_AGE_KEY_PUBLISH: ${{ secrets.SOPS_AGE_KEY_PUBLISH }}
+        run: ./scripts/publish.sh container

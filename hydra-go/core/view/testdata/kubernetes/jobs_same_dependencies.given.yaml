@@ -1,0 +1,80 @@
+# Two Jobs referencing the same ServiceAccount should be merged into one group.
+# After merging, the combined group can absorb the SA and its RBAC chain
+# (RoleBinding, Role, ClusterRoleBinding, ClusterRole).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admission
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: admission
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admission
+  namespace: monitoring
+subjects:
+  - kind: ServiceAccount
+    name: admission
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: admission
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: admission
+rules:
+  - apiGroups: ["admissionregistration.k8s.io"]
+    resources: ["validatingwebhookconfigurations", "mutatingwebhookconfigurations"]
+    verbs: ["get", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admission
+subjects:
+  - kind: ServiceAccount
+    name: admission
+    namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admission
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admission-create
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      serviceAccountName: admission
+      containers:
+        - name: create
+          image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: admission-patch
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      serviceAccountName: admission
+      containers:
+        - name: patch
+          image: registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1

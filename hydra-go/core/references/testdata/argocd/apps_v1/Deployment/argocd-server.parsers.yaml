@@ -1,0 +1,7 @@
+ref-parsers:
+  - predicate: "gvk == 'apps/v1/Deployment' && ns == 'argocd' && name == 'argocd-server'"
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/ConfigMap', ns, 'argocd-rbac-cm'))]"
+        label: runtime
+      - cel: "[refBuilder().outgoing(id('v1/Secret', ns, 'argocd-secret'))]"
+        label: runtime

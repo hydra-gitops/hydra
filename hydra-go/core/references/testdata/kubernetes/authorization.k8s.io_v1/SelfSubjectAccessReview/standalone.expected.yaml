@@ -1,0 +1,8 @@
+refDefinitions:
+    - owner: authorization.k8s.io/v1/SelfSubjectAccessReview//can-i-get-pods
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: authorization.k8s.io/v1/SelfSubjectAccessReview//can-i-get-pods
+refs: []

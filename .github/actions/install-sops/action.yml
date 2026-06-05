@@ -1,0 +1,49 @@
+name: Install sops
+description: Install a pinned sops binary on the runner
+
+runs:
+  using: composite
+  steps:
+    - name: Install cosign
+      uses: ./.github/actions/install-cosign
+
+    - name: Install sops
+      shell: bash
+      run: |
+        set -euo pipefail
+        # Shared with cosign; install-cosign documents why $HOME/.cosign is on PATH.
+        install_dir="${HOME}/.cosign"
+        # Version managed by renovate.json customManagers.
+        # renovate: datasource=github-releases depName=getsops/sops
+        version="3.13.1"
+        release_base="https://github.com/getsops/sops/releases/download/v${version}"
+        binary_name="sops-v${version}.linux.amd64"
+        checksums_name="sops-v${version}.checksums.txt"
+        bundle_name="sops-v${version}.checksums.sigstore.json"
+        identity="https://github.com/getsops/sops/.github/workflows/release.yml@refs/tags/v${version}"
+        oidc_issuer="https://token.actions.githubusercontent.com"
+        tmp_dir="$(mktemp -d)"
+
+        cleanup() {
+          rm -rf "${tmp_dir}"
+        }
+        trap cleanup EXIT
+
+        curl -fsSL "${release_base}/${binary_name}" -o "${tmp_dir}/${binary_name}"
+        curl -fsSL "${release_base}/${checksums_name}" -o "${tmp_dir}/${checksums_name}"
+        curl -fsSL "${release_base}/${bundle_name}" -o "${tmp_dir}/${bundle_name}"
+
+        cosign verify-blob \
+          --bundle "${tmp_dir}/${bundle_name}" \
+          --certificate-identity "${identity}" \
+          --certificate-oidc-issuer "${oidc_issuer}" \
+          "${tmp_dir}/${checksums_name}"
+
+        (
+          cd "${tmp_dir}"
+          sha256sum --check --ignore-missing "${checksums_name}"
+        )
+
+        mkdir -p "${install_dir}"
+        chmod +x "${tmp_dir}/${binary_name}"
+        mv "${tmp_dir}/${binary_name}" "${install_dir}/sops"

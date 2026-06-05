@@ -1,0 +1,13 @@
+# Tests tag/desc/label via CEL functions and YAML-level defaults
+# YAML-level: group tag "uninstall-force", desc "managed credentials", label "force-protected"
+# Pick-level: tag "db" (additive with group tags); CEL .desc only for this test
+ref-parsers:
+  - predicate: 'gvk == "v1/Secret" && name == "db-credentials"'
+    pick:
+      - cel: '[refBuilder().outgoing(id("v1/Secret", ns, name)).desc("database credentials")]'
+        tag:
+          - db
+    tag:
+      - uninstall-force
+    desc: managed credentials
+    label: force-protected

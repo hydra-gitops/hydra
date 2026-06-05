@@ -1,0 +1,20 @@
+ref-parsers:
+  # Ingress -> Service (from rules[].http.paths[].backend.service)
+  - gvk: networking.k8s.io/v1/Ingress
+    pick:
+      - cel: "entity.spec.rules.filter(r, has(r.http)).map(r, r.http.paths.filter(p, has(p.backend) && has(p.backend.service)).map(p, refBuilder().outgoing(id('v1/Service', ns, p.backend.service.name)))).flatten()"
+        label: ingress
+
+  # Ingress -> Service (from defaultBackend.service)
+  - gvk: networking.k8s.io/v1/Ingress
+    cel: "has(entity.spec.defaultBackend) && has(entity.spec.defaultBackend.service)"
+    pick:
+      - cel: "[refBuilder().outgoing(id('v1/Service', ns, entity.spec.defaultBackend.service.name))]"
+        label: ingress
+
+  # Ingress -> Secret (TLS certificate secrets)
+  - gvk: networking.k8s.io/v1/Ingress
+    cel: "has(entity.spec.tls)"
+    pick:
+      - cel: "entity.spec.tls.filter(t, has(t.secretName)).map(t, refBuilder().outgoing(id('v1/Secret', ns, t.secretName)))"
+        label: tls

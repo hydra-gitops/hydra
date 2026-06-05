@@ -1,0 +1,8 @@
+global:
+  info:
+    rootApp: cluster-infra
+
+cert-manager:
+  global:
+    info:
+      childApp: cert-manager

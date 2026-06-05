@@ -1,0 +1,11 @@
+# Configuration with specific root apps allowed for promotion
+ci:
+  rootAppsPath: "apps"
+  environments:
+    - dev
+    - stage
+    - prod
+  promote:
+    promotableRootApps:
+      - demo
+      - cluster-infra

@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: my-job
+  namespace: default
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: busybox
+          command: ["echo", "hello"]
+          volumeMounts:
+            - name: projected-vol
+              mountPath: /etc/projected
+      restartPolicy: Never
+      volumes:
+        - name: projected-vol
+          projected:
+            sources:
+              - configMap:
+                  name: my-config
+              - secret:
+                  name: my-secret
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+  namespace: default
+data:
+  config.yaml: "key: value"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+  namespace: default
+data:
+  secret.yaml: c2VjcmV0OiB2YWx1ZQ==

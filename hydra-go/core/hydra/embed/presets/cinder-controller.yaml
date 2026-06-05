@@ -1,0 +1,26 @@
+# Builtin cluster-defaults preset: classic OpenStack Cinder CSI controller/nodeplugin resources.
+id: cinder-controller
+defaultEnabled: false
+predicates:
+  daemonset:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/csi-cinder-nodeplugin'
+  csi-nodeplugin-workloads:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/csi-cinder-nodeplugin'
+      - 'node.k8s.io/v1/RuntimeClass//csi-cinder-nodeplugin'
+      - 'v1/ServiceAccount/kube-system/csi-cinder-node-sa'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^csi-cinder-nodeplugin-.*")'
+  csi-controller-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//csi-cinder-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//csi-cinder-controller'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/csi-cinder-controller'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/csi-cinder-controller'
+  csi-nodeplugin-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//csi-nodeplugin-role'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//csi-nodeplugin-binding'

@@ -1,0 +1,10 @@
+# unknown step name
+ci:
+  rootAppsPath: "apps"
+  environments:
+    - dev
+    - stage
+    - prod
+  autoSteps:
+    - release
+    - not-a-pipeline

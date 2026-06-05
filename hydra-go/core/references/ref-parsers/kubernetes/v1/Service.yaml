@@ -1,0 +1,6 @@
+ref-parsers:
+  # Service incoming ref - allows pods to reference this service via label matching
+  - gvk: v1/Service
+    pick:
+      - cel: "[refBuilder().outgoing(ref('service', ns + '/' + name))]"
+        label: service

@@ -1,0 +1,30 @@
+apiVersion: isindir.github.com/v1alpha3
+kind: SopsSecret
+metadata:
+  namespace: demo
+  name: db-credentials
+spec:
+  suspend: false
+  secretTemplates:
+    - name: db-credentials
+      stringData:
+        password: "encrypted-value"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: sops-secrets-operator
+  name: sops-secrets-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sops-secrets-operator
+  template:
+    metadata:
+      labels:
+        app: sops-secrets-operator
+    spec:
+      containers:
+        - name: sops-secrets-operator
+          image: isindir/sops-secrets-operator:0.12.0

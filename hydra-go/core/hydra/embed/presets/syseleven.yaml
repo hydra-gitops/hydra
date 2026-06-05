@@ -1,0 +1,146 @@
+# Builtin cluster-defaults preset: SysEleven platform bundle (activates MetaKube, NPD, Quobyte, Canal, and metrics-server; MetaKube also pulls cloudinit/cinder/kubermatic).
+# Kubernetes workload add-ons and kubeadm/GKE-style foundation RBAC that are absent on minimal Talos
+# clusters are owned here so the default-on kubernetes preset stays portable.
+id: syseleven
+defaultEnabled: false
+activates:
+  - metakube
+  - syseleven-node-problem-detector
+  - quobyte
+  - canal
+  - metrics-server
+predicates:
+  deployment:
+    cel:
+      - gvk: apps/v1/Deployment
+        namespace: kube-system
+        cel: 'name.matches("^konnectivity-agent.*") || name.matches("^node-exporter.*") || name.matches("^user-ssh-keys-agent.*")'
+        optional: true
+  daemonset:
+    cel:
+      - gvk: apps/v1/DaemonSet
+        namespace: kube-system
+        cel: 'name.matches("^node-local-dns.*")'
+        optional: true
+  configmaps-infra-platform:
+    ids:
+      - 'v1/ConfigMap/kube-system/cluster-autoscaler-status'
+      - 'v1/ConfigMap/kube-system/kube-proxy'
+  control-plane-snapshot-metrics:
+    ids:
+      - 'admissionregistration.k8s.io/v1/ValidatingWebhookConfiguration//validation-webhook.snapshot.storage.k8s.io'
+  kube-control-plane-leases-cloud:
+    ids:
+      - 'coordination.k8s.io/v1/Lease/kube-system/cloud-controller-manager'
+  k8s-foundation-tenant-starter-platform:
+    ids:
+      - 'v1/ServiceAccount/kube-system/external-admin-user'
+      - 'v1/ConfigMap/kube-public/cluster-info'
+      - 'v1/Secret/kube-system/cloud-config'
+      - 'rbac.authorization.k8s.io/v1/Role/default/namespace-admin'
+      - 'rbac.authorization.k8s.io/v1/Role/default/namespace-editor'
+      - 'rbac.authorization.k8s.io/v1/Role/default/namespace-viewer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-node-lease/namespace-admin'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-node-lease/namespace-editor'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-node-lease/namespace-viewer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/cluster-info'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/namespace-admin'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/namespace-editor'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/namespace-viewer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/namespace-admin'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/namespace-editor'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/namespace-viewer'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/system:cluster-autoscaler'
+  konnectivity-agent:
+    ids:
+      - 'apps/v1/Deployment/kube-system/konnectivity-agent'
+      - 'v1/ServiceAccount/kube-system/system-konnectivity-agent'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:konnectivity-server'
+    cel:
+      - gvk: policy/v1/PodDisruptionBudget
+        namespace: kube-system
+        name: konnectivity-agent
+      - gvk: policy/v1beta1/PodDisruptionBudget
+        namespace: kube-system
+        name: konnectivity-agent
+        optional: true
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^konnectivity-agent-.*")'
+  node-exporter:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/node-exporter'
+      - 'v1/Service/kube-system/node-exporter'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^node-exporter-.*")'
+  node-local-dns:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/node-local-dns'
+      - 'v1/ConfigMap/kube-system/node-local-dns'
+      - 'v1/ServiceAccount/kube-system/node-local-dns'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^node-local-dns-.*")'
+  optional-cloud-vendor-binders:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//external-prometheus'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gce:beta:kubelet-certificate-bootstrap'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//gce:beta:kubelet-certificate-rotation'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//kubeadm:get-nodes'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//csi-snapshot-controller-clusterrole'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//52q8tq4ncc:cluster-admin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//allow-node-bootstrap'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//auto-approve-bootstrap-csrs'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//auto-approve-cert-renewal'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//cloud-controller-manager'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//csi-snapshot-controller-clusterrole-binding'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//external-admin-user'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//fkthdkkhk9:edit'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gce:beta:kubelet-certificate-bootstrap'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//gce:beta:kubelet-certificate-rotation'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//kubeadm:get-nodes'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//srsn9vw4xn:view'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:external-prometheus'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kube-controller-manager-auth-delegator'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kube-scheduler-auth-delegator'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/csi-snapshot-controller-leaderelection'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/csi-snapshot-controller-leaderelection-binding'
+  rbac-rolebindings-platform:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-public/cluster-info'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:cluster-autoscaler'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:kube-controller-manager-authentication-reader'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/system:kube-scheduler-authentication-reader'
+  user-ssh-keys-agent:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/user-ssh-keys-agent'
+      - 'v1/ServiceAccount/kube-system/user-ssh-keys-agent'
+      - 'v1/Secret/kube-system/usersshkeys'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/user-ssh-keys-agent'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/user-ssh-keys-agent'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^user-ssh-keys-agent-.*")'
+  workload-pod-metrics-remaining:
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^konnectivity-agent-.*")'
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^kube-proxy-.*")'
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^node-exporter-.*")'
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^node-local-dns-.*")'
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^user-ssh-keys-agent-.*")'

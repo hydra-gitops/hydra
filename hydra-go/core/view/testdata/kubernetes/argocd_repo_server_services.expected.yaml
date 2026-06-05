@@ -1,0 +1,96 @@
+entities:
+    - id: apps/v1/Deployment/argocd/argocd-repo-server
+      templatePath: unknown-3.yaml
+      templateIndex: 1
+    - id: apps/v1/Deployment/argocd/argocd-repo-server-worker
+      templatePath: unknown-4.yaml
+      templateIndex: 1
+    - id: v1/ConfigMap/argocd/shared-config
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+    - id: v1/ConfigMap/argocd/shared-config-2
+      templatePath: unknown-2.yaml
+      templateIndex: 1
+    - id: v1/Namespace//argocd
+      tags:
+        - app:missing
+    - id: v1/Service/argocd/argocd-repo-server
+      templatePath: unknown-5.yaml
+      templateIndex: 1
+    - id: v1/Service/argocd/argocd-repo-server-metrics
+      templatePath: unknown-6.yaml
+      templateIndex: 1
+groups: []
+references:
+    - from: apps/v1/Deployment/argocd/argocd-repo-server
+      to: v1/ConfigMap/argocd/shared-config
+      labels:
+        - envFrom
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/argocd/argocd-repo-server
+      to: v1/ConfigMap/argocd/shared-config-2
+      labels:
+        - envFrom
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/argocd/argocd-repo-server
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/argocd/argocd-repo-server-worker
+      to: v1/ConfigMap/argocd/shared-config
+      labels:
+        - envFrom
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/argocd/argocd-repo-server-worker
+      to: v1/ConfigMap/argocd/shared-config-2
+      labels:
+        - envFrom
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/argocd/argocd-repo-server-worker
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ConfigMap/argocd/shared-config
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/ConfigMap/argocd/shared-config-2
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/Service/argocd/argocd-repo-server
+      to: apps/v1/Deployment/argocd/argocd-repo-server
+      labels:
+        - service
+      attributes:
+        - origin:source: template
+    - from: v1/Service/argocd/argocd-repo-server
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: v1/Service/argocd/argocd-repo-server-metrics
+      to: apps/v1/Deployment/argocd/argocd-repo-server
+      labels:
+        - service
+      attributes:
+        - origin:source: template
+    - from: v1/Service/argocd/argocd-repo-server-metrics
+      to: v1/Namespace//argocd
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template

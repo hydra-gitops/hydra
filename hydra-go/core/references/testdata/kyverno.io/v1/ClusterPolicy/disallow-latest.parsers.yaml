@@ -1,0 +1,10 @@
+ref-parsers:
+  - predicate: 'gvk.startsWith("kyverno.io/")'
+    pick:
+      - cel: '[refBuilder().outgoing(ref("provider", "kyverno"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "kyverno-admission-controller"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "kyverno"))]'
+  - predicate: 'gvk == "apps/v1/Deployment" && name == "kyverno-background-controller"'
+    pick:
+      - cel: '[refBuilder().incoming(ref("provider", "kyverno"))]'

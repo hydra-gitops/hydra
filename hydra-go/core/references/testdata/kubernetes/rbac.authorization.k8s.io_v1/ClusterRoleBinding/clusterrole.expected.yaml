@@ -1,0 +1,67 @@
+refDefinitions:
+    - owner: rbac.authorization.k8s.io/v1/ClusterRole//cluster-admin-role
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/ClusterRole//cluster-admin-role
+    - owner: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+    - owner: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: rbac.authorization.k8s.io/v1/ClusterRole//cluster-admin-role
+      label: roleRef
+    - owner: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/kube-system/admin-sa
+      label: subject
+      reverse: true
+    - owner: v1/ServiceAccount/kube-system/admin-sa
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/ServiceAccount/kube-system/admin-sa
+    - owner: v1/ServiceAccount/kube-system/admin-sa
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//kube-system
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+      to: rbac.authorization.k8s.io/v1/ClusterRole//cluster-admin-role
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: rbac.authorization.k8s.io/v1/ClusterRoleBinding//cluster-admin-binding
+      to: v1/ServiceAccount/kube-system/admin-sa
+      labels:
+        - subject
+      attributes:
+        - origin:source: test
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: v1/ServiceAccount/kube-system/admin-sa
+      to: v1/Namespace//kube-system
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

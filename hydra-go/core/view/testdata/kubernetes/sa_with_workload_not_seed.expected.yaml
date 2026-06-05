@@ -1,0 +1,75 @@
+entities:
+    - id: apps/v1/Deployment/default/nginx
+      templatePath: unknown-1.yaml
+      templateIndex: 1
+    - id: rbac.authorization.k8s.io/v1/Role/default/nginx-role
+      templatePath: unknown-3.yaml
+      templateIndex: 1
+      rbacRules:
+        - apiGroups:
+            - ""
+          resources:
+            - configmaps
+          verbs:
+            - get
+    - id: rbac.authorization.k8s.io/v1/RoleBinding/default/nginx-binding
+      templatePath: unknown-4.yaml
+      templateIndex: 1
+    - id: v1/Namespace//default
+      tags:
+        - app:missing
+    - id: v1/ServiceAccount/default/nginx-sa
+      templatePath: unknown-2.yaml
+      templateIndex: 1
+groups:
+    - name: nginx (Deployment)
+      ids:
+        - apps/v1/Deployment/default/nginx
+        - rbac.authorization.k8s.io/v1/Role/default/nginx-role
+        - rbac.authorization.k8s.io/v1/RoleBinding/default/nginx-binding
+        - v1/Namespace//default
+        - v1/ServiceAccount/default/nginx-sa
+references:
+    - from: apps/v1/Deployment/default/nginx
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: apps/v1/Deployment/default/nginx
+      to: v1/ServiceAccount/default/nginx-sa
+      labels:
+        - serviceAccount
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/Role/default/nginx-role
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/nginx-binding
+      to: rbac.authorization.k8s.io/v1/Role/default/nginx-role
+      labels:
+        - roleRef
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/nginx-binding
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template
+    - from: rbac.authorization.k8s.io/v1/RoleBinding/default/nginx-binding
+      to: v1/ServiceAccount/default/nginx-sa
+      labels:
+        - subject
+      attributes:
+        - origin:source: template
+      reverse: true
+    - from: v1/ServiceAccount/default/nginx-sa
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: template

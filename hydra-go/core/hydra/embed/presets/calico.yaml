@@ -1,0 +1,99 @@
+# Builtin cluster-defaults preset: Project Calico CNI without Canal/Flannel.
+id: calico
+defaultEnabled: false
+activates:
+  - '!flannel'
+  - '!canal'
+predicates:
+  workloads:
+    ids:
+      - 'apps/v1/DaemonSet/kube-system/calico-node'
+      - 'apps/v1/Deployment/kube-system/calico-kube-controllers'
+      - 'apps/v1/Deployment/kube-system/calico-node-vertical-autoscaler'
+      - 'apps/v1/Deployment/kube-system/calico-typha-deploy'
+      - 'apps/v1/Deployment/kube-system/calico-typha-horizontal-autoscaler'
+      - 'apps/v1/Deployment/kube-system/calico-typha-vertical-autoscaler'
+    cel:
+      - gvk: metrics.k8s.io/v1beta1/PodMetrics
+        namespace: kube-system
+        cel: 'name.matches("^calico-kube-controllers-.*") || name.matches("^calico-node-.*") || name.matches("^calico-typha-.*")'
+  custom-resource-definitions:
+    ids:
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//adminnetworkpolicies.policy.networking.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//baselineadminnetworkpolicies.policy.networking.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgpconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgpfilters.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//bgppeers.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//blockaffinities.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//caliconodestatuses.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//clusterinformations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//felixconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//globalnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//globalnetworksets.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//hostendpoints.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamblocks.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamconfigs.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipamhandles.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ippools.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//ipreservations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//kubecontrollersconfigurations.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//networkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//networksets.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagedglobalnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagedkubernetesnetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//stagednetworkpolicies.crd.projectcalico.org'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//tiers.crd.projectcalico.org'
+  api-service:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1.crd.projectcalico.org'
+  cluster-resources:
+    ids:
+      - 'crd.projectcalico.org/v1/ClusterInformation//default'
+      - 'crd.projectcalico.org/v1/FelixConfiguration//default'
+      - 'crd.projectcalico.org/v1/IPPool//default-ipv4-ippool'
+      - 'crd.projectcalico.org/v1/KubeControllersConfiguration//default'
+      - 'crd.projectcalico.org/v1/Tier//adminnetworkpolicy'
+      - 'crd.projectcalico.org/v1/Tier//baselineadminnetworkpolicy'
+      - 'crd.projectcalico.org/v1/Tier//default'
+  config:
+    ids:
+      - 'v1/ConfigMap/kube-system/calico-config'
+      - 'v1/ConfigMap/kube-system/calico-node-vertical-autoscaler'
+      - 'v1/ConfigMap/kube-system/calico-typha-horizontal-autoscaler'
+      - 'v1/ConfigMap/kube-system/calico-typha-vertical-autoscaler'
+  services:
+    ids:
+      - 'v1/Service/kube-system/calico-felix-monitoring'
+      - 'v1/Service/kube-system/calico-typha'
+      - 'v1/Service/kube-system/calico-typha-monitoring'
+  serviceaccounts:
+    ids:
+      - 'v1/ServiceAccount/kube-system/calico-node'
+      - 'v1/ServiceAccount/kube-system/calico-node-cpva'
+      - 'v1/ServiceAccount/kube-system/calico-typha'
+      - 'v1/ServiceAccount/kube-system/calico-cni-plugin'
+      - 'v1/ServiceAccount/kube-system/calico-kube-controllers'
+      - 'v1/ServiceAccount/kube-system/typha-cpha'
+      - 'v1/ServiceAccount/kube-system/typha-cpva'
+  rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-cni-plugin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-kube-controllers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-node-cpva'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//calico-tier-getter'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-cni-plugin'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-kube-controllers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//typha-cpha'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//typha-cpva'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-node'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-node-cpva'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//calico-tier-getter'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//typha-cpha'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//typha-cpva'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/typha-cpha'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/typha-cpha'
+  pdb:
+    ids:
+      - 'policy/v1/PodDisruptionBudget/kube-system/calico-kube-controllers'
+      - 'policy/v1/PodDisruptionBudget/kube-system/calico-typha'

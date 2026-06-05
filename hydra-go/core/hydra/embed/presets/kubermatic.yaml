@@ -1,0 +1,48 @@
+# Builtin cluster-defaults preset: Kubermatic machine-controller / cluster-api user-plane objects.
+id: kubermatic
+defaultEnabled: false
+predicates:
+  admission:
+    ids:
+      - 'admissionregistration.k8s.io/v1/MutatingWebhookConfiguration//machine-controller.kubermatic.io'
+  cluster-api-crds:
+    ids:
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//clusters.cluster.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//machinedeployments.cluster.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//machines.cluster.k8s.io'
+      - 'apiextensions.k8s.io/v1/CustomResourceDefinition//machinesets.cluster.k8s.io'
+  cluster-api-apiservice:
+    ids:
+      - 'apiregistration.k8s.io/v1/APIService//v1alpha1.cluster.k8s.io'
+  leases:
+    ids:
+      - 'coordination.k8s.io/v1/Lease/kube-system/machine-controller'
+      - 'coordination.k8s.io/v1/Lease/kube-system/user-cluster-controller-leader-lock'
+  cluster-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubermatic-kube-state-metrics'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubermatic-machine-controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubermatic:editors'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubermatic:owners'
+      - 'rbac.authorization.k8s.io/v1/ClusterRole//system:kubermatic:viewers'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic-kube-state-metrics'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic-machine-controller:controller'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic-machine-controller:kubelet-bootstrap'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic-machine-controller:node-signer'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic:editors'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic:owners'
+      - 'rbac.authorization.k8s.io/v1/ClusterRoleBinding//system:kubermatic:viewers'
+  machine-controller-rbac:
+    ids:
+      - 'rbac.authorization.k8s.io/v1/Role/default/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-public/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/Role/kube-system/machine-controller:kubelet-config'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/default/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-public/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/machine-controller'
+      - 'rbac.authorization.k8s.io/v1/RoleBinding/kube-system/machine-controller:kubelet-config'
+  machine-deployments:
+    cel:
+      - gvk: cluster.k8s.io/v1alpha1/MachineDeployment
+        namespace: kube-system

@@ -1,0 +1,102 @@
+refDefinitions:
+    - owner: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+    - owner: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+      type: direct
+      direction: incoming
+      endpoint:
+        type: provider
+        value: sops
+      attributes:
+        - origin:app: prod.cluster-infra.sops-secrets-operator
+        - origin:workload: sops-secrets-operator
+    - owner: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//sops-secrets-operator
+      label: namespace
+    - owner: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+    - owner: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//demo
+      label: namespace
+    - owner: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Secret/demo/db-credentials
+      label: sops
+      attributes:
+        - origin:app: prod.cluster-infra.sops-secrets-operator
+        - origin:generated: controller
+        - origin:workload: sops-secrets-operator
+      reverse: true
+    - owner: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: provider
+        value: sops
+      attributes:
+        - origin:app: prod.cluster-infra.sops-secrets-operator
+        - origin:workload: sops-secrets-operator
+refs:
+    - refType: direct
+      endpointType: id
+      from: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+      to: v1/Namespace//sops-secrets-operator
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: provider
+      from: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      to: apps/v1/Deployment/sops-secrets-operator/sops-secrets-operator
+      attributes:
+        - origin:app: prod.cluster-infra.sops-secrets-operator
+        - origin:source: test
+        - origin:workload: sops-secrets-operator
+    - refType: direct
+      endpointType: id
+      from: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      to: v1/Namespace//demo
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: isindir.github.com/v1alpha3/SopsSecret/demo/db-credentials
+      to: v1/Secret/demo/db-credentials
+      labels:
+        - sops
+      attributes:
+        - origin:app: prod.cluster-infra.sops-secrets-operator
+        - origin:generated: controller
+        - origin:source: test
+        - origin:workload: sops-secrets-operator
+      reverse: true
+    - refType: direct
+      endpointType: id
+      from: v1/Secret/demo/db-credentials
+      to: v1/Namespace//demo
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test

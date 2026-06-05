@@ -1,0 +1,59 @@
+refDefinitions:
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: batch/v1/CronJob/default/my-cronjob
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+    - owner: batch/v1/CronJob/default/my-cronjob
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/my-pvc
+      label: volume
+    - owner: v1/PersistentVolumeClaim/default/my-pvc
+      type: direct
+      direction: incoming
+      endpoint:
+        type: id
+        value: v1/PersistentVolumeClaim/default/my-pvc
+    - owner: v1/PersistentVolumeClaim/default/my-pvc
+      type: direct
+      direction: outgoing
+      endpoint:
+        type: id
+        value: v1/Namespace//default
+      label: namespace
+refs:
+    - refType: direct
+      endpointType: id
+      from: batch/v1/CronJob/default/my-cronjob
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: batch/v1/CronJob/default/my-cronjob
+      to: v1/PersistentVolumeClaim/default/my-pvc
+      labels:
+        - volume
+      attributes:
+        - origin:source: test
+    - refType: direct
+      endpointType: id
+      from: v1/PersistentVolumeClaim/default/my-pvc
+      to: v1/Namespace//default
+      labels:
+        - namespace
+      attributes:
+        - origin:source: test
