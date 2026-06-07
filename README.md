@@ -23,6 +23,8 @@ docker pull ghcr.io/hydra-gitops/hydra:latest
 docker run --rm ghcr.io/hydra-gitops/hydra:latest --help
 ```
 
+Stable releases also publish `vX.Y.Z`, `vX.Y`, `vX`, and `latest` tags.
+
 ### Download CLI archives
 
 Release assets are published on each signed version tag:

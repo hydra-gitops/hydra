@@ -14,6 +14,9 @@ repo_root="$(cd "${script_dir}/.." && pwd)"
 tmp_dir="${RUNNER_TEMP:-/tmp}"
 
 tag=""
+version_core=""
+version_major=""
+version_minor=""
 cosign_key=""
 allowed_signers=""
 container_context=""
@@ -36,6 +39,22 @@ resolve_tag() {
     echo "Tag ${tag} is not a semantic vX.Y.Z tag" >&2
     exit 1
   fi
+
+  local normalized_tag
+  normalized_tag="${tag#v}"
+  version_core="${normalized_tag%%[-+]*}"
+  IFS='.' read -r version_major version_minor _ <<<"${version_core}"
+}
+
+container_tags_for_release() {
+  resolve_tag
+
+  local tags=("${tag}")
+  if [[ "${tag}" == "v${version_core}" ]]; then
+    tags+=("v${version_major}.${version_minor}" "v${version_major}" "latest")
+  fi
+
+  printf '%s\n' "${tags[@]}"
 }
 
 ensure_sops_key() {
@@ -168,19 +187,24 @@ run_container() {
 
   prepare_container_context
 
-  local image digest
+  local image digest container_tags=() build_tags=()
   image="ghcr.io/${GITHUB_REPOSITORY,,}"
+  mapfile -t container_tags < <(container_tags_for_release)
 
   echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
 
   docker buildx create --name hydra-release-builder --driver docker-container --use >/dev/null 2>&1 || docker buildx use hydra-release-builder
   docker buildx inspect --bootstrap >/dev/null
 
+  for container_tag in "${container_tags[@]}"; do
+    build_tags+=(--tag "${image}:${container_tag}")
+  done
+
   docker buildx build \
     --platform linux/amd64,linux/arm64 \
     --file "${repo_root}/tools/build-container-image/Dockerfile" \
     --build-arg "VERSION=${tag}" \
-    --tag "${image}:${tag}" \
+    "${build_tags[@]}" \
     --push \
     "${container_context}"
 

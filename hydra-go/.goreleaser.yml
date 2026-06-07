@@ -90,8 +90,10 @@ release:
     Docker (multi-arch `linux/amd64` + `linux/arm64`):
 
     ```bash
-    docker pull ghcr.io/hydra-gitops/hydra:{{ .Tag }}
+    docker pull ghcr.io/hydra-gitops/hydra:latest
     ```
+
+    Stable releases also publish `{{ .Tag }}`, `vX.Y`, `vX`, and `latest` aliases.
 
     Homebrew (macOS + Linux):
 
