@@ -23,7 +23,7 @@
     "docs/site/hydra_mkdocs.egg-info/**"
   ],
   "schedule": [
-    "after 3am and before 5am every day"
+    "after 3am and before 5am"
   ],
   "semanticCommits": "enabled",
   "semanticCommitScope": "deps",
